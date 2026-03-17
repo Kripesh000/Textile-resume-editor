@@ -1,0 +1,123 @@
+\documentclass[12pt]{article} % bigger
+
+
+% ---------- PACKAGES ----------
+\usepackage{geometry}
+% If you want custom paper size, keep this. Otherwise comment it out.
+%\geometry{paperwidth=25cm, paperheight=38cm}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\usepackage{fontawesome5}
+\usepackage{multicol}
+
+% \input{glyphtounicode} % <-- Removed: causes errors if file not present
+
+% ---------- MULTICOL SPACING ----------
+\setlength{\multicolsep}{-3.0pt}
+\setlength{\columnsep}{-1pt}
+
+% ---------- HEADER/FOOTER ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% ---------- MARGINS ----------
+\addtolength{\oddsidemargin}{-0.6in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1.19in}
+\addtolength{\topmargin}{-.7in}
+\addtolength{\textheight}{1.4in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% ---------- SECTION FORMAT ----------
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large\bfseries
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% ---------- UNICODE IN PDF ----------
+\pdfgentounicode=1
+
+% ---------- CUSTOM COMMANDS ----------
+\newcommand{\resumeItem}[1]{
+  \item\small{#1 \vspace{-2pt}}
+}
+
+\def \linkedin {\linkedinicon\hspace{3pt}\textcolor{LinkColor}{\href{\linkedinlink}{\linkedintext}}}
+\def \email {\emailicon\hspace{3pt}\textcolor{LinkColor}{\href{\emaillink}{\emailtext}}}
+\def \github {\githubicon \hspace{3pt}\textcolor{LinkColor}{\href{\githublink}{\githubtext}}}
+
+
+\newcommand{\classesList}[4]{
+  \item\small{#1 #2 #3 #4 \vspace{-2pt}}
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+  \begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}
+    \textbf{#1} & \textbf{\small #2} \\
+    \textit{\small #3} & \textit{\small #4} \\
+  \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubSubheading}[2]{
+  \item
+  \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+    \textit{\small #1} & \textit{\small #2} \\
+  \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+  \item
+  \begin{tabular*}{1.001\textwidth}{l@{\extracolsep{\fill}}r}
+    \small #1 & \textbf{\small #2}\\
+  \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+
+\renewcommand\labelitemi{$\vcenter{\hbox{\tiny$\bullet$}}$}
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.0in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+% ---------- DOCUMENT ----------
+\begin{document}
+
+% ---------- HEADING ----------
+\begin{center}
+  \textbf{{\LARGE Kripesh Pandit}} \\[6pt]
+  \faIcon{envelope} \hspace{3pt} \href{mailto:test@example.com}{test@example.com} \quad  \quad
+  \faLinkedin \hspace{3pt} \href{https://www.linkedin.com/in/kripesh-pandit}{LinkedIn} \quad  \quad 
+  \faIcon{phone}\hspace{3pt}{1234567890} \hspace{3pt}
+\end{center}
+\vspace{-12pt}
+
+
+% ---------- EDUCATION ----------
+\section{Education}
+\begin{itemize}
+\end{itemize}
+\section{Technical Skills}
+\section{Relevant Experiences}
+\section{Projects}
+\section{Leadership}
+\end{document}

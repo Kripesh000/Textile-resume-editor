@@ -1,0 +1,172 @@
+\documentclass[12pt]{article} % bigger
+
+
+% ---------- PACKAGES ----------
+\usepackage{geometry}
+% If you want custom paper size, keep this. Otherwise comment it out.
+%\geometry{paperwidth=25cm, paperheight=38cm}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\usepackage{fontawesome5}
+\usepackage{multicol}
+
+% \input{glyphtounicode} % <-- Removed: causes errors if file not present
+
+% ---------- MULTICOL SPACING ----------
+\setlength{\multicolsep}{-3.0pt}
+\setlength{\columnsep}{-1pt}
+
+% ---------- HEADER/FOOTER ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% ---------- MARGINS ----------
+\addtolength{\oddsidemargin}{-0.6in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1.19in}
+\addtolength{\topmargin}{-.7in}
+\addtolength{\textheight}{1.4in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% ---------- SECTION FORMAT ----------
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large\bfseries
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% ---------- UNICODE IN PDF ----------
+\pdfgentounicode=1
+
+% ---------- CUSTOM COMMANDS ----------
+\newcommand{\resumeItem}[1]{
+  \item\small{#1 \vspace{-2pt}}
+}
+
+\def \linkedin {\linkedinicon\hspace{3pt}\textcolor{LinkColor}{\href{\linkedinlink}{\linkedintext}}}
+\def \email {\emailicon\hspace{3pt}\textcolor{LinkColor}{\href{\emaillink}{\emailtext}}}
+\def \github {\githubicon \hspace{3pt}\textcolor{LinkColor}{\href{\githublink}{\githubtext}}}
+
+
+\newcommand{\classesList}[4]{
+  \item\small{#1 #2 #3 #4 \vspace{-2pt}}
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+  \begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}
+    \textbf{#1} & \textbf{\small #2} \\
+    \textit{\small #3} & \textit{\small #4} \\
+  \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubSubheading}[2]{
+  \item
+  \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+    \textit{\small #1} & \textit{\small #2} \\
+  \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+  \item
+  \begin{tabular*}{1.001\textwidth}{l@{\extracolsep{\fill}}r}
+    \small #1 & \textbf{\small #2}\\
+  \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+
+\renewcommand\labelitemi{$\vcenter{\hbox{\tiny$\bullet$}}$}
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.0in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+% ---------- DOCUMENT ----------
+\begin{document}
+
+% ---------- HEADING ----------
+\begin{center}
+  \textbf{{\LARGE Kripesh Pandit}} \\[6pt]
+  \faIcon{envelope} \hspace{3pt} \href{mailto:kripesh.pandit21@gmail.com}{kripesh.pandit21@gmail.com} \quad  \quad
+  \faLinkedin \hspace{3pt} \href{https://www.linkedin.com/in/kripesh-pandit}{LinkedIn} \quad  \quad 
+  \faIcon{phone}\hspace{3pt}{615892-4468} \hspace{3pt}
+\end{center}
+\vspace{-12pt}
+
+
+% ---------- EDUCATION ----------
+\section{Education}
+\begin{itemize}
+  \item Fisk University( W.E.B. DuBois Honors)Nashville, TN
+    Bachelor of Science in Computer Science, Minor in Business AdministrationDecember 2026
+  \item Relevant Coursework: Theory of Computation, Operating Systems, Computer Organization, Data Structures and Algorithms, Programming Language, Intro to Computer Science I(Python) \& II(Java), Discrete Mathematics, Calculus I \& II, Statistics 
+ Certifications: Advanced Google Data Analytics Professional Certificate(Coursera), Applied AI Engineering pathway(Codepath), Google Project Management Certificate(Coursera).
+\end{itemize}
+\section{Technical Skills}
+\begin{itemize}
+  \item : Python, Java, C/C++, HTML/CSS, JavaScript, Typescript, SQL 
+   Technologies\& Frameworks: React, Node.js, Express, Flask, React-Redux 
+  Developer Tools: Git, Postman, Cloudflare, VS Code, Firebase
+\end{itemize}
+\section{Relevant Experiences}
+\begin{itemize}
+  \item \%     Nepal Student AssociationFisk University
+  \%     PresidentAug 2024 -- Present
+  \%
+  \item ListStart
+  \%
+  \item \%
+  \item \%
+  \item \%
+  \item \%
+  \item ListEnd
+  \item MSIPP: (Department Of Energy)June 2024 – August 2024
+      Machine Learning Intern
+  \item ListStart
+  \item for a robust Intrusion Detection System implemented on Smart Grids to identify and minimize cyber attacks, leveraging TensorFlow, Scikit-Learn, TensorFlow Federated, and Python.
+  \item )  as well as simulated smart meter device using raspberry pi to analyze consumption and network latency issues
+  \item ListEnd
+  \item Home DepotNashville, TN
+    Tech Innovation and App Strategy ExternSeptember 2023 -- November 2023
+  \item ListStart
+  \item Presented insights and app evolution strategies to senior stakeholders, informing the roadmap for Gen Z market engagement.
+  \item ListEnd
+\end{itemize}
+\section{Projects}
+\begin{itemize}
+  \item MarketMood \$|\$ FastAPI, Uvicorn, Redis, Feedparser, BeautifulSoup4June 2025
+  \item ListStart
+  \item , integrating multi-source financial news ingestion  with asynchronous processing and real-time sentiment analytics
+  \item , enabling seamless integration into dashboards, trading tools, and ML pipelines.
+  \item ListEnd
+  \item Nano GPT \$|\$ Python, Pytorch, NumpyJune 2025
+  \item ListStart
+  \item using PyTorch, focusing on core functionalities such as tokenization, embedding, and transformer blocks.
+  \item , and positional encodings, to understand the inner workings of transformers
+  \item ListEnd
+\end{itemize}
+\section{Leadership}
+\begin{itemize}
+  \item (2023): Selected as 1 of 150 nationwide; completed product case challenges with Meta PMs,
+US Army xTECH (2024): Pitched PFAS water contamination solution; advanced to semifinal round, improving pitch delivery skills,
+HBCU Near-Peer Mentor (2023): Mentored 10+ underclassmen in CS; boosted retention by 15\% in mentee group.
+\end{itemize}
+\end{document}
