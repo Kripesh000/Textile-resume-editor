@@ -1,9 +1,7 @@
 "use client";
 
-import { HeaderData } from "@/lib/types";
-
 interface HeaderFieldsProps {
-  data: HeaderData;
+  data: Record<string, string>;
   onChange: (data: Record<string, string>) => void;
 }
 

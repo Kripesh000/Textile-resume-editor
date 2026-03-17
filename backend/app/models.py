@@ -1,18 +1,20 @@
-# app/models.py — the frozen public contract
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 import uuid
+
+def gen_id():
+    return uuid.uuid4().hex
 
 # ── Atomic pieces ──────────────────────────────────────────
 
 class Bullet(BaseModel):
-    id: str = uuid.uuid4().hex
+    id: str = Field(default_factory=gen_id)
     text: str
     tags: list[str] = []
     order: int = 0                    # for reordering within a parent
 
 class Experience(BaseModel):
-    id: str = uuid.uuid4().hex
+    id: str = Field(default_factory=gen_id)
     company: str
     role: str
     location: str
@@ -22,7 +24,7 @@ class Experience(BaseModel):
     bullets: list[Bullet] = []
 
 class Project(BaseModel):
-    id: str = uuid.uuid4().hex
+    id: str = Field(default_factory=gen_id)
     name: str
     tech_stack: str
     date: str
@@ -30,7 +32,7 @@ class Project(BaseModel):
     bullets: list[Bullet] = []
 
 class Education(BaseModel):
-    id: str = uuid.uuid4().hex
+    id: str = Field(default_factory=gen_id)
     institution: str
     degree: str
     location: str
@@ -40,7 +42,7 @@ class Education(BaseModel):
     awards: Optional[str] = None
 
 class SkillCategory(BaseModel):
-    id: str = uuid.uuid4().hex
+    id: str = Field(default_factory=gen_id)
     name: str                         # "Languages", "Frameworks"
     items: list[str] = []
     tags: list[str] = []
@@ -67,17 +69,23 @@ class SectionConfig(BaseModel):
     order: int
 
 class ResumeVariant(BaseModel):
-    id: str = uuid.uuid4().hex
-    user_id: str
-    name: str                         # "Amazon SDE 2025", "DS - Google"
-    template_id: str
+    id: str = Field(default_factory=gen_id)
+    user_id: Optional[str] = None
+    profile_id: Optional[str] = None
+    name: Optional[str] = "Untitled Resume"
+    template_id: Optional[str] = "jake_classic"
     selected_experience_ids: list[str] = []
     selected_project_ids: list[str] = []
     selected_bullet_ids: list[str] = []  # bullet-level granularity
     selected_skill_category_ids: list[str] = []
     section_order: list[SectionConfig] = []
-    created_at: str
-    updated_at: str
+    # Legacy/Extended fields
+    header_data: Optional[dict] = None
+    sections: Optional[list] = None
+    template_config: Optional[dict] = None  # Principle #7
+    raw_latex: Optional[str] = None         # Principle #7
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
 
 # ── Template config (what each template declares) ──────────
 

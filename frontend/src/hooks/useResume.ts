@@ -96,6 +96,7 @@ export function useResume() {
         };
       });
       debouncedApiCall(`section-${sectionId}`, async () => {
+        console.log("Saving section", sectionId, "with data:", data);
         await api.updateSection(resume.id, sectionId, data);
       });
     },

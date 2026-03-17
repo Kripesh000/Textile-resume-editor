@@ -1,0 +1,256 @@
+\documentclass[12pt]{article} % bigger
+
+
+% ---------- PACKAGES ----------
+\usepackage{geometry}
+% If you want custom paper size, keep this. Otherwise comment it out.
+%\geometry{paperwidth=25cm, paperheight=38cm}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\usepackage{fontawesome5}
+\usepackage{multicol}
+
+% % \input{glyphtounicode} % <-- Removed: causes errors if file not present
+
+% ---------- MULTICOL SPACING ----------
+\setlength{\multicolsep}{-3.0pt}
+\setlength{\columnsep}{-1pt}
+
+% ---------- HEADER/FOOTER ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% ---------- MARGINS ----------
+\addtolength{\oddsidemargin}{-0.6in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1.19in}
+\addtolength{\topmargin}{-.7in}
+\addtolength{\textheight}{1.4in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% ---------- SECTION FORMAT ----------
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large\bfseries
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% ---------- UNICODE IN PDF ----------
+% \pdfgentounicode=1
+
+% ---------- CUSTOM COMMANDS ----------
+\newcommand{\resumeItem}[1]{
+  \item\small{#1 \vspace{-2pt}}
+}
+
+\def \linkedin {\linkedinicon\hspace{3pt}\textcolor{LinkColor}{\href{\linkedinlink}{\linkedintext}}}
+\def \email {\emailicon\hspace{3pt}\textcolor{LinkColor}{\href{\emaillink}{\emailtext}}}
+\def \github {\githubicon \hspace{3pt}\textcolor{LinkColor}{\href{\githublink}{\githubtext}}}
+
+
+\newcommand{\classesList}[4]{
+  \item\small{#1 #2 #3 #4 \vspace{-2pt}}
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+  \begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}
+    \textbf{#1} & \textbf{\small #2} \\
+    \textit{\small #3} & \textit{\small #4} \\
+  \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubSubheading}[2]{
+  \item
+  \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+    \textit{\small #1} & \textit{\small #2} \\
+  \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+  \item
+  \begin{tabular*}{1.001\textwidth}{l@{\extracolsep{\fill}}r}
+    \small #1 & \textbf{\small #2}\\
+  \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+
+\renewcommand\labelitemi{$\vcenter{\hbox{\tiny$\bullet$}}$}
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.0in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+% ---------- DOCUMENT ----------
+\begin{document}
+
+% ---------- HEADING ----------
+\begin{center}
+  \textbf{{\LARGE Kripesh Pandit}} \\[6pt]
+  \faIcon{envelope} \hspace{3pt} \href{mailto:\VAR{header.email | escape_latex}}{\VAR{header.email | escape_latex}} \quad  \quad
+  \faLinkedin \hspace{3pt} \href{https://www.linkedin.com/in/kripesh-pandit}{LinkedIn} \quad  \quad 
+  \faIcon{phone}\hspace{3pt}{\VAR{header.phone | escape_latex}} \hspace{3pt}
+\end{center}
+\vspace{-12pt}
+
+
+% ---------- EDUCATION ----------
+\section{Education}
+%%j2 for section in sections
+%%j2 if section.title == 'Education'
+\begin{itemize}
+%%j2 for item in section.entries
+%%j2 if item.company
+  \item \textbf{\VAR{item.company | escape_latex}} -- \VAR{item.role | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.institution
+  \item \textbf{\VAR{item.institution | escape_latex}} -- \VAR{item.degree | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.name
+  \item \textbf{\VAR{item.name | escape_latex}} $|$ \VAR{item.tech_stack | escape_latex}
+%%j2 elif item.category
+  \item \textbf{\VAR{item.category | escape_latex}}: \VAR{item['items'] | join(', ') | escape_latex}
+%%j2 elif item.text
+  \item \VAR{item.text | escape_latex}
+%%j2 endif
+%%j2 if item.bullets
+  \begin{itemize}
+  %%j2 for bullet in item.bullets
+    \item \VAR{bullet | escape_latex}
+  %%j2 endfor
+  \end{itemize}
+%%j2 endif
+%%j2 endfor
+\end{itemize}
+%%j2 endif
+%%j2 endfor
+
+\section{Technical Skills}
+%%j2 for section in sections
+%%j2 if section.title == 'Technical Skills'
+\begin{itemize}
+%%j2 for item in section.entries
+%%j2 if item.company
+  \item \textbf{\VAR{item.company | escape_latex}} -- \VAR{item.role | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.institution
+  \item \textbf{\VAR{item.institution | escape_latex}} -- \VAR{item.degree | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.name
+  \item \textbf{\VAR{item.name | escape_latex}} $|$ \VAR{item.tech_stack | escape_latex}
+%%j2 elif item.category
+  \item \textbf{\VAR{item.category | escape_latex}}: \VAR{item['items'] | join(', ') | escape_latex}
+%%j2 elif item.text
+  \item \VAR{item.text | escape_latex}
+%%j2 endif
+%%j2 if item.bullets
+  \begin{itemize}
+  %%j2 for bullet in item.bullets
+    \item \VAR{bullet | escape_latex}
+  %%j2 endfor
+  \end{itemize}
+%%j2 endif
+%%j2 endfor
+\end{itemize}
+%%j2 endif
+%%j2 endfor
+
+\section{Relevant Experiences}
+%%j2 for section in sections
+%%j2 if section.title == 'Relevant Experiences'
+\begin{itemize}
+%%j2 for item in section.entries
+%%j2 if item.company
+  \item \textbf{\VAR{item.company | escape_latex}} -- \VAR{item.role | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.institution
+  \item \textbf{\VAR{item.institution | escape_latex}} -- \VAR{item.degree | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.name
+  \item \textbf{\VAR{item.name | escape_latex}} $|$ \VAR{item.tech_stack | escape_latex}
+%%j2 elif item.category
+  \item \textbf{\VAR{item.category | escape_latex}}: \VAR{item['items'] | join(', ') | escape_latex}
+%%j2 elif item.text
+  \item \VAR{item.text | escape_latex}
+%%j2 endif
+%%j2 if item.bullets
+  \begin{itemize}
+  %%j2 for bullet in item.bullets
+    \item \VAR{bullet | escape_latex}
+  %%j2 endfor
+  \end{itemize}
+%%j2 endif
+%%j2 endfor
+\end{itemize}
+%%j2 endif
+%%j2 endfor
+
+\section{Projects}
+%%j2 for section in sections
+%%j2 if section.title == 'Projects'
+\begin{itemize}
+%%j2 for item in section.entries
+%%j2 if item.company
+  \item \textbf{\VAR{item.company | escape_latex}} -- \VAR{item.role | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.institution
+  \item \textbf{\VAR{item.institution | escape_latex}} -- \VAR{item.degree | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.name
+  \item \textbf{\VAR{item.name | escape_latex}} $|$ \VAR{item.tech_stack | escape_latex}
+%%j2 elif item.category
+  \item \textbf{\VAR{item.category | escape_latex}}: \VAR{item['items'] | join(', ') | escape_latex}
+%%j2 elif item.text
+  \item \VAR{item.text | escape_latex}
+%%j2 endif
+%%j2 if item.bullets
+  \begin{itemize}
+  %%j2 for bullet in item.bullets
+    \item \VAR{bullet | escape_latex}
+  %%j2 endfor
+  \end{itemize}
+%%j2 endif
+%%j2 endfor
+\end{itemize}
+%%j2 endif
+%%j2 endfor
+
+\section{Leadership}
+%%j2 for section in sections
+%%j2 if section.title == 'Leadership'
+\begin{itemize}
+%%j2 for item in section.entries
+%%j2 if item.company
+  \item \textbf{\VAR{item.company | escape_latex}} -- \VAR{item.role | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.institution
+  \item \textbf{\VAR{item.institution | escape_latex}} -- \VAR{item.degree | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.name
+  \item \textbf{\VAR{item.name | escape_latex}} $|$ \VAR{item.tech_stack | escape_latex}
+%%j2 elif item.category
+  \item \textbf{\VAR{item.category | escape_latex}}: \VAR{item['items'] | join(', ') | escape_latex}
+%%j2 elif item.text
+  \item \VAR{item.text | escape_latex}
+%%j2 endif
+%%j2 if item.bullets
+  \begin{itemize}
+  %%j2 for bullet in item.bullets
+    \item \VAR{bullet | escape_latex}
+  %%j2 endfor
+  \end{itemize}
+%%j2 endif
+%%j2 endfor
+\end{itemize}
+%%j2 endif
+%%j2 endfor
+
+\end{document}

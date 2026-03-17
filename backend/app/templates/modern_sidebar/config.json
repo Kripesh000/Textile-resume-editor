@@ -1,0 +1,17 @@
+{
+  "id": "modern_sidebar",
+  "name": "Modern Sidebar",
+  "description": "A two-column resume design with a sleek sidebar for contact info and skills.",
+  "tags": ["modern", "two-column", "sleek"],
+  "max_experiences": 5,
+  "max_projects": 5,
+  "max_skill_categories": 6,
+  "supports": {
+    "summary": true,
+    "photo": false,
+    "color_accent": true,
+    "two_column_skills": true
+  },
+  "section_order_locked": false,
+  "required_sections": ["Education", "Experience"]
+}

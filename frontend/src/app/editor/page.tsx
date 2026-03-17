@@ -34,6 +34,7 @@ export default function EditorPage() {
   const [showResumeList, setShowResumeList] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -68,13 +69,18 @@ export default function EditorPage() {
     setUploading(true);
     setUploadProgress("Uploading file...");
     try {
-      setUploadProgress("Parsing resume...");
-      const uploaded = await api.uploadResume(file);
+      const isLatex = file.name.toLowerCase().endsWith(".tex");
+      setUploadProgress(isLatex ? "Parsing LaTeX (this may take a moment)..." : "Parsing resume...");
+      const uploaded = isLatex
+        ? await api.uploadLatex(file)
+        : await api.uploadResume(file);
       setUploadProgress("Loading editor...");
       loadResume(uploaded.id);
       const list = await api.listResumes();
       setResumeList(list);
       setShowResumeList(false);
+      setToast("✓ Resume created & items added to your profile");
+      setTimeout(() => setToast(null), 5000);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Upload failed");
     } finally {
@@ -109,6 +115,18 @@ export default function EditorPage() {
         </div>
       )}
 
+      {/* Success Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 animate-[slideUp_0.3s_ease-out]">
+          <div className="bg-green-600 text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-2">
+            <span className="text-sm font-medium">{toast}</span>
+            <button onClick={() => setToast(null)} className="text-white/70 hover:text-white ml-2">
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Top bar */}
       <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
         <div className="flex items-center gap-4">
@@ -127,28 +145,58 @@ export default function EditorPage() {
             </button>
           </nav>
           {resumeList.length > 0 && (
-            <div className="relative">
-              <button
-                onClick={() => setShowResumeList(!showResumeList)}
-                className="text-sm text-gray-900 hover:text-gray-800 px-3 py-1 border border-gray-200 rounded-md"
-              >
-                {resume?.title || "Select Resume"} ▾
-              </button>
-              {showResumeList && (
-                <div className="absolute top-full mt-1 left-0 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
-                  {resumeList.map((r) => (
-                    <button
-                      key={r.id}
-                      onClick={() => {
-                        loadResume(r.id);
-                        setShowResumeList(false);
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50"
-                    >
-                      {r.title}
-                    </button>
-                  ))}
-                </div>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <button
+                  onClick={() => setShowResumeList(!showResumeList)}
+                  className="text-sm text-gray-900 hover:text-gray-800 px-3 py-1 border border-gray-200 rounded-md"
+                >
+                  {resume?.title || "Select Resume"} ▾
+                </button>
+                {showResumeList && (
+                  <div className="absolute top-full mt-1 left-0 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+                    {resumeList.map((r) => (
+                      <button
+                        key={r.id}
+                        onClick={() => {
+                          loadResume(r.id);
+                          setShowResumeList(false);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50"
+                      >
+                        {r.title}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {resume && (
+                <button
+                  title="Delete Resume"
+                  onClick={async () => {
+                    if (window.confirm("Are you sure you want to delete this resume? This action cannot be undone.")) {
+                      try {
+                        await api.deleteResume(resume.id);
+                        setToast("Resume deleted successfully");
+                        setTimeout(() => setToast(null), 3000);
+                        const list = await api.listResumes();
+                        setResumeList(list);
+                        if (list.length > 0) {
+                          loadResume(list[0].id);
+                        } else {
+                          window.location.reload();
+                        }
+                      } catch (err) {
+                        alert(err instanceof Error ? err.message : "Failed to delete resume");
+                      }
+                    }
+                  }}
+                  className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
               )}
             </div>
           )}
@@ -163,7 +211,7 @@ export default function EditorPage() {
           <input
             ref={fileInputRef}
             type="file"
-            accept=".pdf"
+            accept=".pdf,.tex"
             onChange={handleUpload}
             className="hidden"
           />
@@ -172,7 +220,7 @@ export default function EditorPage() {
             disabled={uploading}
             className="text-sm px-3 py-1.5 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 disabled:opacity-50"
           >
-            Upload PDF
+            Upload PDF / LaTeX
           </button>
           <button
             onClick={handleCreateResume}
@@ -215,7 +263,7 @@ export default function EditorPage() {
             >
               <span className="text-3xl">📄</span>
               <span className="font-medium text-gray-800 group-hover:text-blue-600">Upload PDF</span>
-              <span className="text-xs text-gray-400 text-center">Import an existing resume and start editing</span>
+              <span className="text-xs text-gray-400 text-center">Import a PDF or LaTeX (.tex) resume</span>
             </button>
             {/* Path 2: From scratch */}
             <button

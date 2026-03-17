@@ -32,11 +32,9 @@ export default function TileList({
   return (
     <DragDropProvider
       onDragEnd={(event) => {
-        setItems((prev) => {
-          const updated = move(prev, event);
-          onReorderSections(updated);
-          return updated;
-        });
+        const updated = move(items, event);
+        setItems(updated);
+        onReorderSections(updated);
       }}
     >
       <div className="space-y-3">

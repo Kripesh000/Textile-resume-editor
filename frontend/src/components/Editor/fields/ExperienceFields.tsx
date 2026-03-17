@@ -1,40 +1,41 @@
 "use client";
 
-import { ExperienceItem } from "@/lib/types";
+import { Experience } from "@/lib/types";
 import ImproviseButton from "../../AI/ImproviseButton";
 
 interface ExperienceFieldsProps {
-  items: ExperienceItem[];
-  onChange: (items: ExperienceItem[]) => void;
+  items: Experience[];
+  onChange: (items: Experience[]) => void;
   resumeId: string;
   sectionType: string;
 }
 
 export default function ExperienceFields({ items, onChange, sectionType }: ExperienceFieldsProps) {
-  const updateItem = (index: number, field: keyof ExperienceItem, value: unknown) => {
+  const updateItem = (index: number, field: keyof Experience, value: unknown) => {
     const updated = [...items];
     updated[index] = { ...updated[index], [field]: value };
     onChange(updated);
   };
 
   const addItem = () => {
-    onChange([...items, { company: "", role: "", location: "", start_date: "", end_date: "", bullets: [""] }]);
+    onChange([...items, { id: Date.now().toString(), company: "", role: "", location: "", start: "", end: "", tags: [], bullets: [] }]);
   };
 
   const removeItem = (index: number) => {
-    onChange(items.filter((_, i) => i !== index));
+    onChange(items.filter((_: unknown, i: number) => i !== index));
   };
 
   const addBullet = (itemIndex: number) => {
     const updated = [...items];
-    updated[itemIndex] = { ...updated[itemIndex], bullets: [...updated[itemIndex].bullets, ""] };
+    const newBullet = { id: Date.now().toString(), text: "", tags: [], order: updated[itemIndex].bullets.length };
+    updated[itemIndex] = { ...updated[itemIndex], bullets: [...updated[itemIndex].bullets, newBullet] as any };
     onChange(updated);
   };
 
   const updateBullet = (itemIndex: number, bulletIndex: number, value: string) => {
     const updated = [...items];
     const bullets = [...updated[itemIndex].bullets];
-    bullets[bulletIndex] = value;
+    bullets[bulletIndex] = { ...bullets[bulletIndex], text: value } as any;
     updated[itemIndex] = { ...updated[itemIndex], bullets };
     onChange(updated);
   };
@@ -43,7 +44,7 @@ export default function ExperienceFields({ items, onChange, sectionType }: Exper
     const updated = [...items];
     updated[itemIndex] = {
       ...updated[itemIndex],
-      bullets: updated[itemIndex].bullets.filter((_, i) => i !== bulletIndex),
+      bullets: updated[itemIndex].bullets.filter((_: unknown, i: number) => i !== bulletIndex),
     };
     onChange(updated);
   };
@@ -80,14 +81,14 @@ export default function ExperienceFields({ items, onChange, sectionType }: Exper
             <div className="flex gap-1">
               <input
                 placeholder="Start"
-                value={item.start_date}
-                onChange={(e) => updateItem(i, "start_date", e.target.value)}
+                value={item.start}
+                onChange={(e) => updateItem(i, "start", e.target.value)}
                 className="w-1/2 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
               <input
                 placeholder="End"
-                value={item.end_date}
-                onChange={(e) => updateItem(i, "end_date", e.target.value)}
+                value={item.end}
+                onChange={(e) => updateItem(i, "end", e.target.value)}
                 className="w-1/2 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
@@ -97,13 +98,13 @@ export default function ExperienceFields({ items, onChange, sectionType }: Exper
               <div key={bi} className="flex items-center gap-1">
                 <span className="text-gray-700 text-xs">-</span>
                 <input
-                  value={bullet}
+                  value={bullet.text || ""}
                   onChange={(e) => updateBullet(i, bi, e.target.value)}
                   placeholder="e.g. Led a team of 5 to deliver a 30% increase in..."
                   className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
                 <ImproviseButton
-                  text={bullet}
+                  text={bullet.text || ""}
                   context={{ role: item.role, company: item.company, section_type: sectionType }}
                   onResult={(text) => updateBullet(i, bi, text)}
                 />

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.models.user import User
+from app.db_models.user import User
 from app.schemas.ai import ImproviseRequest, ImproviseResponse
 from app.services.ai_service import improvise
 from app.services.auth_service import get_current_user

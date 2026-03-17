@@ -3,7 +3,7 @@ from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.models.user import User
+from app.db_models.user import User
 from app.routers.resumes import _get_user_resume
 from app.services.auth_service import get_current_user
 from app.services.latex_service import render_template, compile_pdf

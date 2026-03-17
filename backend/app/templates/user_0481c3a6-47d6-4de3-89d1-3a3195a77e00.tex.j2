@@ -1,0 +1,214 @@
+\documentclass[12pt]{article} % bigger
+
+
+% ---------- PACKAGES ----------
+\usepackage{geometry}
+% If you want custom paper size, keep this. Otherwise comment it out.
+%\geometry{paperwidth=25cm, paperheight=38cm}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\usepackage{fontawesome5}
+\usepackage{multicol}
+
+% % \input{glyphtounicode} % <-- Removed: causes errors if file not present
+
+% ---------- MULTICOL SPACING ----------
+\setlength{\multicolsep}{-3.0pt}
+\setlength{\columnsep}{-1pt}
+
+% ---------- HEADER/FOOTER ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% ---------- MARGINS ----------
+\addtolength{\oddsidemargin}{-0.6in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1.19in}
+\addtolength{\topmargin}{-.7in}
+\addtolength{\textheight}{1.4in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% ---------- SECTION FORMAT ----------
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large\bfseries
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% ---------- UNICODE IN PDF ----------
+% \pdfgentounicode=1
+
+% ---------- CUSTOM COMMANDS ----------
+\newcommand{\resumeItem}[1]{
+  \item\small{#1 \vspace{-2pt}}
+}
+
+\def \linkedin {\linkedinicon\hspace{3pt}\textcolor{LinkColor}{\href{\linkedinlink}{\linkedintext}}}
+\def \email {\emailicon\hspace{3pt}\textcolor{LinkColor}{\href{\emaillink}{\emailtext}}}
+\def \github {\githubicon \hspace{3pt}\textcolor{LinkColor}{\href{\githublink}{\githubtext}}}
+
+
+\newcommand{\classesList}[4]{
+  \item\small{#1 #2 #3 #4 \vspace{-2pt}}
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+  \begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}
+    \textbf{#1} & \textbf{\small #2} \\
+    \textit{\small #3} & \textit{\small #4} \\
+  \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubSubheading}[2]{
+  \item
+  \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+    \textit{\small #1} & \textit{\small #2} \\
+  \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+  \item
+  \begin{tabular*}{1.001\textwidth}{l@{\extracolsep{\fill}}r}
+    \small #1 & \textbf{\small #2}\\
+  \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+
+\renewcommand\labelitemi{$\vcenter{\hbox{\tiny$\bullet$}}$}
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.0in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+% ---------- DOCUMENT ----------
+\begin{document}
+
+% ---------- HEADING ----------
+\begin{center}
+  \textbf{{\LARGE Kripesh Pandit}} \\[6pt]
+  \faIcon{envelope} \hspace{3pt} \href{mailto:\VAR{header_data.email | escape_latex}}{\VAR{header_data.email | escape_latex}} \quad  \quad
+  \faLinkedin \hspace{3pt} \href{https://www.linkedin.com/in/kripesh-pandit}{LinkedIn} \quad  \quad 
+  \faIcon{phone}\hspace{3pt}{\VAR{header_data.phone | escape_latex}} \hspace{3pt}
+\end{center}
+\vspace{-12pt}
+
+
+% ---------- EDUCATION ----------
+\section{Education}
+\resumeSubHeadingListStart
+  \resumeSubheading
+    {Fisk University( W.E.B. DuBois Honors)}{Nashville, TN}
+    {Bachelor of Science in Computer Science, Minor in Business Administration}{December 2026}
+\resumeSubHeadingListEnd
+\begin{itemize}[leftmargin=0in, label = {}]
+\small \item {
+ \textbf{Relevant Coursework}{: Theory of Computation, Operating Systems, Computer Organization, Data Structures and Algorithms, Programming Language, Intro to Computer Science I(Python) \& II(Java), Discrete Mathematics, Calculus I \& II, Statistics} \\
+ \textbf{Certifications:} {Advanced Google Data Analytics Professional Certificate(Coursera), Applied AI Engineering pathway(Codepath), Google Project Management Certificate(Coursera).
+
+}\resumeSubHeadingListEnd
+
+\vspace{-12pt}
+% ---------- TECHNICAL SKILLS ----------
+\section{Technical Skills}
+\begin{itemize}[leftmargin=0in, label={}]
+\small \item{
+  \textbf{Languages}{: Python, Java, C/C++, HTML/CSS, JavaScript, Typescript, SQL} \\
+   \textbf{Technologies\& Frameworks}{: React, Node.js, Express, Flask, React-Redux} \\
+  \textbf{Developer Tools:}{ Git, Postman, Cloudflare, VS Code, Firebase}
+
+\end{itemize}
+\vspace{-17pt}
+
+% ---------- EXPERIENCE ----------
+\section{Relevant Experiences}
+
+
+\resumeSubHeadingListStart
+
+
+
+
+  %  \resumeSubheading
+  %     {Nepal Student Association}{Fisk University}
+  %     {President}{Aug 2024 -- Present}
+  %     \resumeItemListStart
+  %       \resumeItem{Spearheaded cultural programs that attracted 200+ attendees, strengthening community engagement and showcasing organizational impact.}
+  %       \resumeItem{Secured funding and managed budgets to deliver high-quality events, ensuring alignment of resources with organizational goals.}
+  %       \resumeItem{Delegated tasks across a 10-member executive team, fostering accountability and efficient execution of strategic initiatives.}
+  %       \resumeItem{Collaborated with university administration and external partners to promote cross-cultural understanding and increase visibility of the association.}
+  % \resumeItemListEnd
+  \resumeSubheading
+      {MSIPP: (Department Of Energy)}{June 2024 – August 2024}
+      {Machine Learning Intern}{}
+      \resumeItemListStart
+        \resumeItem{Designed and tested \textbf{Machine Learning models} for a robust \textbf{Intrusion Detection System} implemented on Smart Grids to identify and minimize cyber attacks, leveraging \textbf{TensorFlow}, \textbf{Scikit-Learn}, \textbf{TensorFlow Federated}, and \textbf{Python}.}
+        \resumeItem{Performed comprehensive comparison of central models and their federated counterparts in terms of performance metrics (\textbf{F1 Score, Accuracy, Precision})  as well as simulated smart meter device using raspberry pi to analyze consumption and network latency issues }
+      \resumeItemListEnd
+
+    \resumeSubheading
+    {Home Depot}{Nashville, TN}
+    {Tech Innovation and App Strategy Extern}{September 2023 -- November 2023}
+  \resumeItemListStart
+    \resumeItem{Led an interactive mobile app feature targeting Gen Z, raising engagement by 15\% and improving conversion (KPI) by 10\% via A/B testing and data analysis.}
+    \resumeItem{Presented insights and app evolution strategies to senior stakeholders, informing the roadmap for Gen Z market engagement.}
+  \resumeItemListEnd
+
+   
+
+\resumeSubHeadingListEnd
+
+\vspace{-17pt}
+% ---------- PROJECTS ----------
+\section{Projects}
+\resumeSubHeadingListStart
+
+  \resumeProjectHeading
+          {\textbf{MarketMood} $|$ \emph{FastAPI, Uvicorn, Redis, Feedparser, BeautifulSoup4}}{June 2025 }
+          \resumeItemListStart
+            \resumeItem{Designed and built a production-ready Finance News \& Market Sentiment API using \textbf{FastAPI}, integrating multi-source financial news ingestion  with \textbf{asynchronous processing and real-time sentiment analytics}}
+            \resumeItem{Implemented advanced filtering (time windows, sentiment thresholds, source selection), integrated company fundamentals and analyst metrics, and exposed fully documented REST endpoints via \textbf{Swagger/ReDoc}, enabling seamless integration into \textbf{dashboards, trading tools, and ML pipelines}.}
+          \resumeItemListEnd
+
+
+  \resumeProjectHeading
+          {\textbf{Nano GPT} $|$ \emph{Python, Pytorch, Numpy}}{June 2025 }
+          \resumeItemListStart
+            \resumeItem{Implemented a scaled-down version of the \textbf{Generative Pre-trained Transformer (GPT) architecture} using PyTorch, focusing on core functionalities such as tokenization, embedding, and transformer blocks.}
+            \resumeItem{Developed the self-attention mechanism from scratch, including \textbf{multi-head attention}, and positional encodings, to understand the inner workings of transformers}
+          \resumeItemListEnd
+
+  
+\resumeSubHeadingListEnd
+
+\vspace{-12pt}
+% ---------- LEADERSHIP ----------
+\section{Leadership}
+\begin{itemize}[leftmargin=0in, label={}]
+\small \item{
+\textbf{Meta Scholar Cohort 3} (2023): Selected as 1 of 150 nationwide; completed product case challenges with Meta PMs,
+\textbf{US Army xTECH} (2024): Pitched PFAS water contamination solution; advanced to semifinal round, improving pitch delivery skills,
+\textbf{HBCU Near-Peer Mentor} (2023): Mentored 10+ underclassmen in CS; boosted retention by 15\% in mentee group.
+
+}
+\end{itemize}
+
+\end{document}

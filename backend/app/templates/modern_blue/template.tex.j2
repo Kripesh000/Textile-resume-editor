@@ -1,0 +1,144 @@
+\documentclass[11pt,a4paper,sans]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[default]{lato}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{tabularx}
+
+% --- Color Theme ---
+\definecolor{primary}{HTML}{2B5B84}   % Dark Blue
+\definecolor{textmain}{HTML}{333333}  % Dark Gray
+\definecolor{textlight}{HTML}{666666} % Light Gray
+
+% --- Typography ---
+\color{textmain}
+\setlength{\parindent}{0pt}
+
+% --- Hyperlinks ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primary,
+    filecolor=primary,
+    urlcolor=primary,
+}
+
+% --- Sections ---
+\titleformat{\section}{\large\bfseries\color{primary}}{}{0em}{}[\vspace{-0.5em}\rule{\textwidth}{0.4pt}]
+\titlespacing*{\section}{0pt}{1.5em}{0.8em}
+
+% --- Custom Commands ---
+\newcommand{\resumeItem}[1]{\item\small{#1}}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{0.3em}
+  \begin{tabularx}{\textwidth}{@{}X r@{}}
+    \textbf{#1} & \small\textbf{#2} \\
+    \textit{\color{textlight}#3} & \textit{\color{textlight}\small#4} \\
+  \end{tabularx}\vspace{-0.5em}
+}
+
+\begin{document}
+
+% --- Header ---
+\begin{center}
+    {\Huge \bfseries \color{primary} \VAR{header_data.name | escape_latex}} \\[0.5em]
+    \small \color{textlight}
+    \VAR{header_data.phone | escape_latex} $\mid$ 
+    \href{mailto:\VAR{header_data.email | escape_latex}}{\VAR{header_data.email | escape_latex}} 
+    \BLOCK{if header_data.linkedin}
+    $\mid$ \href{\VAR{header_data.linkedin | escape_latex}}{\VAR{header_data.linkedin | escape_latex}}
+    \BLOCK{endif}
+    \BLOCK{if header_data.github}
+    $\mid$ \href{\VAR{header_data.github | escape_latex}}{\VAR{header_data.github | escape_latex}}
+    \BLOCK{endif}
+\end{center}
+\vspace{1em}
+
+% --- Sections ---
+%%j2 for section in sections
+\BLOCK{if section.entries}
+\section*{\VAR{section.title | escape_latex}}
+
+  %%j2 if section.type == "experience"
+    \begin{itemize}[leftmargin=*, label={}, itemsep=0.8em]
+    %%j2 for entry in section.entries
+      \item
+      \resumeSubheading
+        {\VAR{entry.company | escape_latex}}{\VAR{entry.start | escape_latex} -- \VAR{entry.end | escape_latex}}
+        {\VAR{entry.role | escape_latex}}{\VAR{entry.location | escape_latex}}
+        \BLOCK{if entry.bullets}
+        \begin{itemize}[leftmargin=1.2em, label={\color{primary}\tiny$\bullet$}, itemsep=0.2em, topsep=0.3em]
+        %%j2 for bullet in entry.bullets
+          \resumeItem{\VAR{bullet.text | escape_latex}}
+        %%j2 endfor
+        \end{itemize}
+        \BLOCK{endif}
+    %%j2 endfor
+    \end{itemize}
+    
+  %%j2 elif section.type == "project"
+    \begin{itemize}[leftmargin=*, label={}, itemsep=0.8em]
+    %%j2 for entry in section.entries
+      \item
+      \begin{tabularx}{\textwidth}{@{}X r@{}}
+        \textbf{\VAR{entry.name | escape_latex}} \textit{\color{textlight}\small(\VAR{entry.tech_stack | escape_latex})} & \small\textbf{\VAR{entry.date | escape_latex}} \\
+      \end{tabularx}\vspace{-0.5em}
+        \BLOCK{if entry.bullets}
+        \begin{itemize}[leftmargin=1.2em, label={\color{primary}\tiny$\bullet$}, itemsep=0.2em, topsep=0.3em]
+        %%j2 for bullet in entry.bullets
+          \resumeItem{\VAR{bullet.text | escape_latex}}
+        %%j2 endfor
+        \end{itemize}
+        \BLOCK{endif}
+    %%j2 endfor
+    \end{itemize}
+    
+  %%j2 elif section.type == "education"
+    \begin{itemize}[leftmargin=*, label={}, itemsep=0.8em]
+    %%j2 for entry in section.entries
+      \item
+      \resumeSubheading
+        {\VAR{entry.institution | escape_latex}}{\VAR{entry.end | escape_latex}}
+        {\VAR{entry.degree | escape_latex}}{\VAR{entry.location | escape_latex}}
+        \BLOCK{if entry.gpa}
+        \begin{itemize}[leftmargin=1.2em, label={\color{primary}\tiny$\bullet$}, itemsep=0.2em, topsep=0.3em]
+          \resumeItem{\textbf{GPA:} \VAR{entry.gpa | escape_latex}}
+          \BLOCK{if entry.coursework}
+            \resumeItem{\textbf{Coursework:} \VAR{entry.coursework | escape_latex}}
+          \BLOCK{endif}
+        \end{itemize}
+        \BLOCK{endif}
+    %%j2 endfor
+    \end{itemize}
+    
+  %%j2 elif section.type == "skills"
+    \begin{itemize}[leftmargin=*, label={}, itemsep=0.8em]
+      \item
+      \begin{tabularx}{\textwidth}{@{}l X@{}}
+      %%j2 for entry in section.entries
+        \textbf{\color{primary}\VAR{entry.name | escape_latex}:} & \small \VAR{entry['items'] | join(', ') | escape_latex} \\[0.3em]
+      %%j2 endfor
+      \end{tabularx}
+    \end{itemize}
+
+  %%j2 elif section.type == "generic" or section.type == "summary"
+    \begin{itemize}[leftmargin=*, label={}, itemsep=0.8em]
+    %%j2 for entry in section.entries
+      \item
+      \BLOCK{if entry.title}
+        \textbf{\VAR{entry.title | escape_latex}} \BLOCK{if entry.subtitle} -- \VAR{entry.subtitle | escape_latex} \BLOCK{endif} \\
+      \BLOCK{endif}
+      \VAR{entry.text | escape_latex}
+    %%j2 endfor
+    \end{itemize}
+    
+  %%j2 endif
+\BLOCK{endif}
+%%j2 endfor
+
+\end{document}

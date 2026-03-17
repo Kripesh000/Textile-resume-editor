@@ -1,0 +1,80 @@
+\documentclass[10pt,a4paper,sans]{moderncv}
+
+% Moderncv themes
+\moderncvstyle{casual}
+\moderncvcolor{blue}
+
+% Character encoding
+\usepackage[utf8]{inputenc}
+
+% Adjust the page margins
+\usepackage[scale=0.75]{geometry}
+
+% Personal data
+\name{\VAR{header_data.name | escape_latex}}{}
+\email{\VAR{header_data.email | escape_latex}}
+\BLOCK{if header_data.phone}
+\phone[mobile]{\VAR{header_data.phone | escape_latex}}
+\BLOCK{endif}
+\BLOCK{if header_data.website}
+\homepage{\VAR{header_data.website | escape_latex}}
+\BLOCK{endif}
+\BLOCK{if header_data.linkedin}
+\social[linkedin]{\VAR{header_data.linkedin | escape_latex}}
+\BLOCK{endif}
+\BLOCK{if header_data.github}
+\social[github]{\VAR{header_data.github | escape_latex}}
+\BLOCK{endif}
+
+\begin{document}
+\makecvtitle
+
+\BLOCK{for section in sections}
+\BLOCK{if section.entries}
+\section{\VAR{section.title | escape_latex}}
+
+\BLOCK{if section.type == 'education'}
+\BLOCK{for entry in section.entries}
+\cventry{\VAR{entry.end | escape_latex}}{\VAR{entry.degree | escape_latex}}{\VAR{entry.institution | escape_latex}}{\VAR{entry.location | escape_latex}}{}{\VAR{entry.coursework | escape_latex}}
+\BLOCK{endfor}
+
+\BLOCK{elif section.type == 'experience'}
+\BLOCK{for entry in section.entries}
+\cventry{\VAR{entry.start | escape_latex} -- \VAR{entry.end | escape_latex}}{\VAR{entry.role | escape_latex}}{\VAR{entry.company | escape_latex}}{\VAR{entry.location | escape_latex}}{}{
+\BLOCK{if entry.bullets}
+\begin{itemize}
+\BLOCK{for bullet in entry.bullets}
+\item \VAR{bullet.text | escape_latex}
+\BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+}
+\BLOCK{endfor}
+
+\BLOCK{elif section.type == 'project'}
+\BLOCK{for entry in section.entries}
+\cvitem{\VAR{entry.date | escape_latex}}{\textbf{\VAR{entry.name | escape_latex}}\BLOCK{if entry.tech_stack} (\VAR{entry.tech_stack | escape_latex})\BLOCK{endif}}
+\BLOCK{if entry.bullets}
+\begin{itemize}
+\BLOCK{for bullet in entry.bullets}
+\item \VAR{bullet.text | escape_latex}
+\BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+\BLOCK{endfor}
+
+\BLOCK{elif section.type == 'skills'}
+\BLOCK{for entry in section.entries}
+\cvitem{\VAR{entry.name | escape_latex}}{\VAR{entry['items'] | join(', ') | escape_latex}}
+\BLOCK{endfor}
+
+\BLOCK{else}
+\BLOCK{for entry in section.entries}
+\cvitem{}{\VAR{entry.text | default('') | escape_latex}}
+\BLOCK{endfor}
+\BLOCK{endif}
+
+\BLOCK{endif}
+\BLOCK{endfor}
+
+\end{document}

@@ -18,16 +18,16 @@ interface EditorShellProps {
 }
 
 const TEMPLATES = [
-  { key: "classic", label: "Classic" },
-  { key: "modern", label: "Modern" },
-  { key: "minimal", label: "Minimal" },
+  { key: "jake_classic", label: "Classic" },
+  { key: "modern_blue", label: "Modern Blue" },
+  { key: "modern_sidebar", label: "Modern Sidebar" },
   { key: "custom", label: "Custom" },
 ];
 
 const SECTION_OPTIONS: { type: SectionType; label: string; icon: string }[] = [
   { type: "experience", label: "Experience", icon: "💼" },
   { type: "education", label: "Education", icon: "🎓" },
-  { type: "project", label: "Projects", icon: "🚀" },
+  { type: "projects", label: "Projects", icon: "🚀" },
   { type: "skills", label: "Skills", icon: "⚡" },
   { type: "generic", label: "Other", icon: "📝" },
 ];
@@ -221,32 +221,28 @@ function ImportModal({
 
   const handleImport = async () => {
     if (!profile) return;
+    console.log("Starting import with items:", selectedItems);
     setImporting(true);
     try {
-      for (const pSection of profile.sections) {
+      const allItemIds: string[] = [];
+      for (const pSection of profile.sections || []) {
         const ids = selectedItems[pSection.id];
-        if (!ids || ids.size === 0) continue;
-
-        let resumeSection = resume.sections.find(
-          (s) => s.section_type === pSection.section_type
-        );
-
-        if (!resumeSection) {
-          resumeSection = await api.createSection(resume.id, {
-            section_type: pSection.section_type,
-            title: pSection.title,
-            order_index: resume.sections.length,
-          });
+        if (ids && ids.size > 0) {
+          allItemIds.push(...Array.from(ids));
         }
+      }
 
+      if (allItemIds.length > 0) {
+        console.log("Sending import request to backend:", allItemIds);
         await api.importToResume({
           resume_id: resume.id,
-          section_id: resumeSection.id,
-          item_ids: Array.from(ids),
+          item_ids: allItemIds,
         });
       }
+      console.log("Import successful, calling onImported");
       onImported();
     } catch (err) {
+      console.error("Import failed:", err);
       alert(err instanceof Error ? err.message : "Import failed");
     } finally {
       setImporting(false);
@@ -260,10 +256,10 @@ function ImportModal({
         return `${d.role || ""} at ${d.company || ""}`.trim() || "Untitled";
       case "education":
         return `${d.degree || ""} - ${d.institution || ""}`.trim() || "Untitled";
-      case "project":
+      case "projects":
         return (d.name as string) || "Untitled";
       case "skills":
-        return `${d.category || ""}: ${((d.items as string[]) || []).join(", ")}` || "Untitled";
+        return `${d.name || ""}: ${((d.items as string[]) || []).join(", ")}` || "Untitled";
       default:
         return (d.text as string) || "Untitled";
     }
@@ -282,13 +278,13 @@ function ImportModal({
             <div className="flex justify-center py-8">
               <div className="animate-spin h-6 w-6 border-2 border-blue-600 border-t-transparent rounded-full" />
             </div>
-          ) : !profile || profile.sections.length === 0 ? (
+          ) : !profile || (profile.sections || []).length === 0 ? (
             <p className="text-gray-500 text-center py-8">
               No profile data yet. Go to your Profile to add experiences, education, and more.
             </p>
           ) : (
             <div className="space-y-4">
-              {profile.sections.map((pSection) => (
+              {(profile.sections || []).map((pSection) => (
                 <div key={pSection.id}>
                   <h4 className="font-medium text-sm text-gray-700 mb-2">
                     {pSection.title}
@@ -298,11 +294,11 @@ function ImportModal({
                     <p className="text-xs text-gray-400 ml-4">No items</p>
                   ) : (
                     <div className="space-y-1">
-                      {pSection.items.map((item) => {
+                      {pSection.items.map((item, idx) => {
                         const checked = selectedItems[pSection.id]?.has(item.id) || false;
                         return (
                           <label
-                            key={item.id}
+                            key={`${item.id}-${idx}`}
                             className={`flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer border ${checked ? "border-blue-300 bg-blue-50" : "border-gray-200 hover:bg-gray-50"
                               }`}
                           >

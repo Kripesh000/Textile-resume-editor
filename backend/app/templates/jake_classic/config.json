@@ -1,0 +1,16 @@
+{
+  "id": "jake_classic",
+  "name": "Jake's Classic",
+  "tags": ["ats-safe", "classic", "clean"],
+  "max_experiences": 5,
+  "max_projects": 5,
+  "max_skill_categories": 5,
+  "supports": {
+    "summary": false,
+    "photo": false,
+    "color_accent": false,
+    "two_column_skills": false
+  },
+  "section_order_locked": false,
+  "required_sections": ["Experience", "Education"]
+}

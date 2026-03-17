@@ -45,99 +45,94 @@
 %# --- Header ---
 \BLOCK{if config.header_centered}
 \begin{center}
-  \BLOCK{if config.accent_color}{\LARGE\bfseries\color{accent} \VAR{header.name | default('Your Name') | escape_latex}}\BLOCK{else}{\LARGE\bfseries \VAR{header.name | default('Your Name') | escape_latex}}\BLOCK{endif} \\[4pt]
+  \BLOCK{if config.accent_color}{\LARGE\bfseries\color{accent} \VAR{header_data.name | default('Your Name', true) | escape_latex}}\BLOCK{else}{\LARGE\bfseries \VAR{header_data.name | default('Your Name', true) | escape_latex}}\BLOCK{endif} \\[4pt]
   \small
-  \BLOCK{if header.email}\href{mailto:\VAR{header.email | escape_latex}}{\VAR{header.email | escape_latex}}\BLOCK{endif}
-  \BLOCK{if header.phone} $|$ \VAR{header.phone | escape_latex}\BLOCK{endif}
-  \BLOCK{if header.linkedin} $|$ \href{https://\VAR{header.linkedin | escape_latex}}{\VAR{header.linkedin | escape_latex}}\BLOCK{endif}
-  \BLOCK{if header.github} $|$ \href{https://\VAR{header.github | escape_latex}}{\VAR{header.github | escape_latex}}\BLOCK{endif}
-  \BLOCK{if header.website} $|$ \href{https://\VAR{header.website | escape_latex}}{\VAR{header.website | escape_latex}}\BLOCK{endif}
+  \BLOCK{if header_data.email}\href{mailto:\VAR{header_data.email | escape_latex}}{\VAR{header_data.email | escape_latex}}\BLOCK{endif}
+  \BLOCK{if header_data.phone} $|$ \VAR{header_data.phone | escape_latex}\BLOCK{endif}
+  \BLOCK{if header_data.linkedin} $|$ \href{https://\VAR{header_data.linkedin | escape_latex}}{\VAR{header_data.linkedin | escape_latex}}\BLOCK{endif}
+  \BLOCK{if header_data.github} $|$ \href{https://\VAR{header_data.github | escape_latex}}{\VAR{header_data.github | escape_latex}}\BLOCK{endif}
+  \BLOCK{if header_data.website} $|$ \href{https://\VAR{header_data.website | escape_latex}}{\VAR{header_data.website | escape_latex}}\BLOCK{endif}
 \end{center}
 \BLOCK{else}
-{\LARGE\bfseries \VAR{header.name | default('Your Name') | escape_latex}} \hfill
+{\LARGE\bfseries \VAR{header_data.name | default('Your Name', true) | escape_latex}} \hfill
 \small
-\BLOCK{if header.email}\href{mailto:\VAR{header.email | escape_latex}}{\VAR{header.email | escape_latex}}\BLOCK{endif}
-\BLOCK{if header.phone} $|$ \VAR{header.phone | escape_latex}\BLOCK{endif}
-\BLOCK{if header.linkedin} $|$ \href{https://\VAR{header.linkedin | escape_latex}}{\VAR{header.linkedin | escape_latex}}\BLOCK{endif}
-\BLOCK{if header.github} $|$ \href{https://\VAR{header.github | escape_latex}}{\VAR{header.github | escape_latex}}\BLOCK{endif}
-\BLOCK{if header.website} $|$ \href{https://\VAR{header.website | escape_latex}}{\VAR{header.website | escape_latex}}\BLOCK{endif}
+\BLOCK{if header_data.email}\href{mailto:\VAR{header_data.email | escape_latex}}{\VAR{header_data.email | escape_latex}}\BLOCK{endif}
+\BLOCK{if header_data.phone} $|$ \VAR{header_data.phone | escape_latex}\BLOCK{endif}
+\BLOCK{if header_data.linkedin} $|$ \href{https://\VAR{header_data.linkedin | escape_latex}}{\VAR{header_data.linkedin | escape_latex}}\BLOCK{endif}
+\BLOCK{if header_data.github} $|$ \href{https://\VAR{header_data.github | escape_latex}}{\VAR{header_data.github | escape_latex}}\BLOCK{endif}
+\BLOCK{if header_data.website} $|$ \href{https://\VAR{header_data.website | escape_latex}}{\VAR{header_data.website | escape_latex}}\BLOCK{endif}
 \BLOCK{endif}
 
-%% for section in sections
-%% if section.entries
+%%j2 for section in sections
+%%j2 if section.entries
 
 \BLOCK{if section.type == 'education'}
 \section{\VAR{section.title | escape_latex}}
-%% for item in section.entries
+%%j2 for item in section.entries
 \textbf{\VAR{item.institution | default('') | escape_latex}} \hfill \VAR{item.location | default('') | escape_latex} \\
-\textit{\VAR{item.degree | default('') | escape_latex}} \hfill \textit{\VAR{item.start_date | default('') | escape_latex} -- \VAR{item.end_date | default('') | escape_latex}}
-%% set filtered_details = item.details | default([]) | reject('equalto', '') | list
-%% if filtered_details
+\textit{\VAR{item.degree | default('') | escape_latex}} \hfill \textit{\VAR{item.end | default('') | escape_latex}}
+%%j2 if item.coursework
 \begin{itemize}
-%% for detail in filtered_details
-  \item \VAR{detail | escape_latex}
-%% endfor
+  \item \VAR{item.coursework | escape_latex}
 \end{itemize}
-%% endif
+%%j2 endif
 \BLOCK{if config.compact}\BLOCK{else}\vspace{2pt}\BLOCK{endif}
-%% endfor
+%%j2 endfor
 \BLOCK{endif}
 
 \BLOCK{if section.type == 'experience'}
 \section{\VAR{section.title | escape_latex}}
-%% for item in section.entries
+%%j2 for item in section.entries
 \textbf{\VAR{item.role | default('') | escape_latex}} \hfill \VAR{item.location | default('') | escape_latex} \\
-\textit{\VAR{item.company | default('') | escape_latex}} \hfill \textit{\VAR{item.start_date | default('') | escape_latex} -- \VAR{item.end_date | default('') | escape_latex}}
-%% set filtered_bullets = item.bullets | default([]) | reject('equalto', '') | list
-%% if filtered_bullets
+\textit{\VAR{item.company | default('') | escape_latex}} \hfill \textit{\VAR{item.start | default('') | escape_latex} -- \VAR{item.end | default('') | escape_latex}}
+%%j2 if item.bullets
 \begin{itemize}
-%% for bullet in filtered_bullets
-  \item \VAR{bullet | escape_latex}
-%% endfor
+%%j2 for bullet in item.bullets
+  \item \VAR{bullet.text | escape_latex}
+%%j2 endfor
 \end{itemize}
-%% endif
+%%j2 endif
 \BLOCK{if config.compact}\BLOCK{else}\vspace{2pt}\BLOCK{endif}
-%% endfor
+%%j2 endfor
 \BLOCK{endif}
 
 \BLOCK{if section.type == 'project'}
 \section{\VAR{section.title | escape_latex}}
-%% for item in section.entries
+%%j2 for item in section.entries
 \textbf{\VAR{item.name | default('') | escape_latex}}
 \BLOCK{if item.tech_stack} $|$ \textit{\VAR{item.tech_stack | escape_latex}}\BLOCK{endif}
-\BLOCK{if item.url} $|$ \href{https://\VAR{item.url | escape_latex}}{\small\VAR{item.url | escape_latex}}\BLOCK{endif}
-%% set filtered_bullets = item.bullets | default([]) | reject('equalto', '') | list
-%% if filtered_bullets
+\BLOCK{if item.url} $|$ \href{https://\VAR{item.url | escape_latex}}{\small \VAR{item.url | escape_latex}}\BLOCK{endif}
+%%j2 if item.bullets
 \begin{itemize}
-%% for bullet in filtered_bullets
-  \item \VAR{bullet | escape_latex}
-%% endfor
+%%j2 for bullet in item.bullets
+  \item \VAR{bullet.text | escape_latex}
+%%j2 endfor
 \end{itemize}
-%% endif
-%% endfor
+%%j2 endif
+%%j2 endfor
 \BLOCK{endif}
 
 \BLOCK{if section.type == 'skills'}
 \section{\VAR{section.title | escape_latex}}
 \begin{itemize}[label={}]
-%% for item in section.entries
-  \item \textbf{\VAR{item.category | default('') | escape_latex}:} \VAR{item['items'] | default([]) | join(', ') | escape_latex}
-%% endfor
+%%j2 for item in section.entries
+  \item \textbf{\VAR{item.name | default('') | escape_latex}:} \VAR{item['items'] | default([]) | join(', ') | escape_latex}
+%%j2 endfor
 \end{itemize}
 \BLOCK{endif}
 
 \BLOCK{if section.type == 'generic'}
 \section{\VAR{section.title | escape_latex}}
 \begin{itemize}
-%% for item in section.entries
-%% if item.text | default('')
+%%j2 for item in section.entries
+%%j2 if item.text | default('')
   \item \VAR{item.text | escape_latex}
-%% endif
-%% endfor
+%%j2 endif
+%%j2 endfor
 \end{itemize}
 \BLOCK{endif}
 
-%% endif
-%% endfor
+%%j2 endif
+%%j2 endfor
 
 \end{document}

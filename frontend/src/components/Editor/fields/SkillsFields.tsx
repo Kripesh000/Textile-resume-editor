@@ -1,27 +1,27 @@
 "use client";
 
-import { SkillItem } from "@/lib/types";
+import { SkillCategory } from "@/lib/types";
 
 interface SkillsFieldsProps {
-  items: SkillItem[];
-  onChange: (items: SkillItem[]) => void;
+  items: SkillCategory[];
+  onChange: (items: SkillCategory[]) => void;
   resumeId: string;
   sectionType: string;
 }
 
 export default function SkillsFields({ items, onChange }: SkillsFieldsProps) {
-  const updateItem = (index: number, field: keyof SkillItem, value: unknown) => {
+  const updateItem = (index: number, field: keyof SkillCategory, value: unknown) => {
     const updated = [...items];
     updated[index] = { ...updated[index], [field]: value };
     onChange(updated);
   };
 
   const addItem = () => {
-    onChange([...items, { category: "", items: [] }]);
+    onChange([...items, { id: Date.now().toString(), name: "", items: [], tags: [] }]);
   };
 
   const removeItem = (index: number) => {
-    onChange(items.filter((_, i) => i !== index));
+    onChange(items.filter((_: unknown, i: number) => i !== index));
   };
 
   return (
@@ -30,13 +30,13 @@ export default function SkillsFields({ items, onChange }: SkillsFieldsProps) {
         <div key={i} className="flex items-start gap-2">
           <input
             placeholder="Category (e.g., Languages)"
-            value={item.category}
-            onChange={(e) => updateItem(i, "category", e.target.value)}
+            value={item.name || ""}
+            onChange={(e) => updateItem(i, "name", e.target.value)}
             className="w-1/3 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
           <input
             placeholder="Skills (comma-separated)"
-            value={item.items.join(", ")}
+            value={(item.items || []).join(", ")}
             onChange={(e) =>
               updateItem(
                 i,

@@ -4,14 +4,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.database import get_db
-from app.models.resume import Resume, Section
-from app.models.user import User
+from app.db_models.resume import Resume, Section
+from app.db_models.user import User
 from app.schemas.resume import (
     ResumeCreate, ResumeUpdate, ResumeResponse, ResumeListItem,
     SectionCreate, SectionUpdate, SectionResponse, SectionReorderItem,
 )
 from app.services.auth_service import get_current_user
 from app.services.pdf_parser_service import parse_pdf
+from app.services.latex_parser_service import parse_latex, save_user_template
+from app.services.profile_import_service import import_parsed_to_profile
 
 router = APIRouter(prefix="/api/v1/resumes", tags=["resumes"])
 
@@ -103,6 +105,78 @@ async def upload_resume(
         db.add(section)
 
     await db.commit()
+
+    # Also import parsed data into user's profile
+    profile_result = await import_parsed_to_profile(parsed, user.id, db)
+
+    resume_response = await _get_user_resume(resume.id, user, db)
+    return resume_response
+
+
+
+@router.post("/upload-latex", response_model=ResumeResponse, status_code=status.HTTP_201_CREATED)
+async def upload_latex(
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    # Validate file type
+    filename = file.filename or ""
+    if not filename.lower().endswith(".tex"):
+        raise HTTPException(status_code=400, detail="Only .tex files are supported")
+
+    content = await file.read()
+
+    # Validate size (5MB max for text files)
+    if len(content) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large (max 5MB)")
+
+    try:
+        tex_content = content.decode("utf-8")
+    except UnicodeDecodeError:
+        raise HTTPException(status_code=400, detail="File must be valid UTF-8 text")
+
+    # Validate it looks like LaTeX
+    if r"\documentclass" not in tex_content:
+        raise HTTPException(status_code=400, detail="File does not appear to be a valid LaTeX document")
+
+    # Parse LaTeX using AI
+    parsed = await parse_latex(tex_content)
+    header = parsed.get("header", {})
+    template_content = parsed.get("template")
+
+    # Create resume
+    title = header.get("name", "").strip() or "Uploaded Resume"
+    resume = Resume(
+        user_id=user.id,
+        title=title,
+        template_key="custom",  # Will be updated if template generation succeeds
+        header_data=header,
+    )
+    db.add(resume)
+    await db.flush()
+
+    # Save user-specific template if AI generated one
+    if template_content:
+        template_key = save_user_template(resume.id, template_content)
+        resume.template_key = template_key
+
+    # Create sections
+    for i, section_data in enumerate(parsed.get("sections", [])):
+        section = Section(
+            resume_id=resume.id,
+            section_type=section_data.get("section_type", "generic"),
+            title=section_data.get("title", "Section"),
+            order_index=i,
+            items=section_data.get("items", []),
+        )
+        db.add(section)
+
+    await db.commit()
+
+    # Also import parsed data into user's profile
+    profile_result = await import_parsed_to_profile(parsed, user.id, db)
+
     return await _get_user_resume(resume.id, user, db)
 
 

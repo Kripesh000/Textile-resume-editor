@@ -1,125 +1,32 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { api } from "@/lib/api";
-import {
-  Profile,
-  PersonalInfo,
-  ProfileSection,
-  ProfileItem,
-  SECTION_DEFAULTS,
-  SectionType,
+import { useProfile } from "@/hooks/useProfile";
+import { 
+  Profile, 
+  Experience, 
+  Education, 
+  Project, 
+  SkillCategory, 
+  Bullet 
 } from "@/lib/types";
-
-const SECTION_TYPES: { type: string; label: string }[] = [
-  { type: "experience", label: "Experience" },
-  { type: "education", label: "Education" },
-  { type: "project", label: "Projects" },
-  { type: "skills", label: "Skills" },
-  { type: "generic", label: "Other" },
-];
+const uuidv4 = () => crypto.randomUUID();
 
 export default function ProfilePage() {
   const { user, loading: authLoading, logout } = useAuth();
   const router = useRouter();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const { profile, loading, error, saveStatus, updateProfile, importResume } = useProfile();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!authLoading && !user) router.push("/auth/login");
   }, [user, authLoading, router]);
 
-  const loadProfile = useCallback(async () => {
-    try {
-      const p = await api.getProfile();
-      setProfile(p);
-    } catch {
-      // Profile might be empty
-      setProfile({ personal_info: { name: "", email: "", phone: "", linkedin: "", github: "", website: "" }, sections: [] });
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (user) loadProfile();
-  }, [user, loadProfile]);
-
-  const savePersonalInfo = async (info: Partial<PersonalInfo>) => {
-    setSaving(true);
-    try {
-      const updated = await api.updatePersonalInfo(info);
-      setProfile((p) => p ? { ...p, personal_info: updated } : p);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const addSection = async (type: string) => {
-    const defaults = SECTION_DEFAULTS[type as SectionType];
-    const section = await api.createProfileSection({
-      section_type: type,
-      title: defaults?.title || "New Section",
-      order_index: profile?.sections.length || 0,
-    });
-    setProfile((p) => p ? { ...p, sections: [...p.sections, { ...section, items: [] }] } : p);
-  };
-
-  const deleteSection = async (sectionId: string) => {
-    await api.deleteProfileSection(sectionId);
-    setProfile((p) => p ? { ...p, sections: p.sections.filter((s) => s.id !== sectionId) } : p);
-  };
-
-  const addItem = async (sectionId: string, sectionType: string) => {
-    const defaults = SECTION_DEFAULTS[sectionType as SectionType];
-    const item = await api.createProfileItem(sectionId, {
-      data: defaults?.item ? { ...defaults.item } : { text: "" },
-    });
-    setProfile((p) => {
-      if (!p) return p;
-      return {
-        ...p,
-        sections: p.sections.map((s) =>
-          s.id === sectionId ? { ...s, items: [...s.items, item] } : s
-        ),
-      };
-    });
-  };
-
-  const updateItem = async (itemId: string, sectionId: string, data: Record<string, unknown>) => {
-    await api.updateProfileItem(itemId, { data });
-    setProfile((p) => {
-      if (!p) return p;
-      return {
-        ...p,
-        sections: p.sections.map((s) =>
-          s.id === sectionId
-            ? { ...s, items: s.items.map((i) => (i.id === itemId ? { ...i, data } : i)) }
-            : s
-        ),
-      };
-    });
-  };
-
-  const deleteItem = async (itemId: string, sectionId: string) => {
-    await api.deleteProfileItem(itemId);
-    setProfile((p) => {
-      if (!p) return p;
-      return {
-        ...p,
-        sections: p.sections.map((s) =>
-          s.id === sectionId ? { ...s, items: s.items.filter((i) => i.id !== itemId) } : s
-        ),
-      };
-    });
-  };
-
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full" />
       </div>
     );
@@ -127,465 +34,414 @@ export default function ProfilePage() {
 
   if (!user || !profile) return null;
 
+  const handleUpdate = (updates: Partial<Profile>) => {
+    updateProfile({ ...profile, ...updates });
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      await importResume(file);
+    } catch (err) {
+      alert("Failed to import resume. Please try again.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top bar */}
-      <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
-        <div className="flex items-center gap-4">
+      <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm">
+        <div className="flex items-center gap-6">
           <h1
-            className="text-xl font-bold cursor-pointer"
+            className="text-xl font-bold cursor-pointer hover:text-blue-600 transition-colors"
             onClick={() => router.push("/editor")}
           >
-            TeX<span className="text-blue-600">Tile</span>
+            LaTeXify
           </h1>
-          <nav className="flex gap-2 ml-4">
+          <nav className="flex gap-1">
             <button
               onClick={() => router.push("/editor")}
-              className="text-sm px-3 py-1.5 rounded-md text-gray-600 hover:bg-gray-100"
+              className="text-sm px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
             >
-              Editor
+              My Resumes
             </button>
-            <button className="text-sm px-3 py-1.5 rounded-md bg-blue-50 text-blue-700 font-medium">
-              Profile
+            <button className="text-sm px-4 py-2 rounded-lg bg-blue-50 text-blue-700 font-semibold">
+              Master Profile
             </button>
           </nav>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-700">{user.name}</span>
+        
+        <div className="flex items-center gap-4">
+          <div className="flex flex-col items-end">
+            <span className="text-sm font-medium text-gray-900">{user.name}</span>
+            <span className="text-[10px] text-gray-500">{saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'All changes saved' : 'Idle'}</span>
+          </div>
           <button
             onClick={() => { logout(); router.push("/"); }}
-            className="text-sm text-gray-700 hover:text-gray-900"
+            className="text-sm text-gray-500 hover:text-red-600 transition-colors"
           >
             Sign out
           </button>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto py-8 px-6">
-        <h2 className="text-2xl font-bold mb-1">Your Profile</h2>
-        <p className="text-gray-500 text-sm mb-8">
-          Store all your information here. When building a resume, you can import items from your profile.
-        </p>
-
-        {/* Personal Information */}
-        <PersonalInfoCard info={profile.personal_info} onSave={savePersonalInfo} saving={saving} />
-
-        {/* Sections */}
-        {profile.sections.map((section) => (
-          <ProfileSectionCard
-            key={section.id}
-            section={section}
-            onDeleteSection={() => deleteSection(section.id)}
-            onAddItem={() => addItem(section.id, section.section_type)}
-            onUpdateItem={(itemId, data) => updateItem(itemId, section.id, data)}
-            onDeleteItem={(itemId) => deleteItem(itemId, section.id)}
-          />
-        ))}
-
-        {/* Add section */}
-        <div className="mt-6">
-          <AddSectionMenu onAdd={addSection} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// --- Personal Info Card ---
-
-function PersonalInfoCard({
-  info,
-  onSave,
-  saving,
-}: {
-  info: PersonalInfo;
-  onSave: (data: Partial<PersonalInfo>) => void;
-  saving: boolean;
-}) {
-  const [form, setForm] = useState(info);
-  const [dirty, setDirty] = useState(false);
-
-  useEffect(() => { setForm(info); }, [info]);
-
-  const update = (field: keyof PersonalInfo, value: string) => {
-    setForm((f) => ({ ...f, [field]: value }));
-    setDirty(true);
-  };
-
-  const handleSave = () => {
-    onSave(form);
-    setDirty(false);
-  };
-
-  const fields: { key: keyof PersonalInfo; label: string; placeholder: string }[] = [
-    { key: "name", label: "Full Name", placeholder: "John Doe" },
-    { key: "email", label: "Email", placeholder: "john@example.com" },
-    { key: "phone", label: "Phone", placeholder: "(555) 123-4567" },
-    { key: "linkedin", label: "LinkedIn", placeholder: "linkedin.com/in/johndoe" },
-    { key: "github", label: "GitHub", placeholder: "github.com/johndoe" },
-    { key: "website", label: "Website", placeholder: "johndoe.com" },
-  ];
-
-  return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-      <h3 className="font-semibold text-lg mb-4">Personal Information</h3>
-      <div className="grid grid-cols-2 gap-4">
-        {fields.map((f) => (
-          <div key={f.key}>
-            <label className="block text-xs text-gray-500 mb-1">{f.label}</label>
-            <input
-              value={form[f.key]}
-              onChange={(e) => update(f.key, e.target.value)}
-              placeholder={f.placeholder}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
+      <div className="max-w-5xl mx-auto py-12 px-6">
+        <div className="flex justify-between items-start mb-8">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900">Master Profile</h2>
+            <p className="text-gray-500 mt-1">
+              Your "Single Source of Truth". All resume variants are built from this content.
+            </p>
           </div>
-        ))}
-      </div>
-      {dirty && (
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="mt-4 px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-        >
-          {saving ? "Saving..." : "Save"}
-        </button>
-      )}
-    </div>
-  );
-}
-
-// --- Profile Section Card ---
-
-function ProfileSectionCard({
-  section,
-  onDeleteSection,
-  onAddItem,
-  onUpdateItem,
-  onDeleteItem,
-}: {
-  section: ProfileSection;
-  onDeleteSection: () => void;
-  onAddItem: () => void;
-  onUpdateItem: (itemId: string, data: Record<string, unknown>) => void;
-  onDeleteItem: (itemId: string) => void;
-}) {
-  const [collapsed, setCollapsed] = useState(false);
-
-  return (
-    <div className="bg-white border border-gray-200 rounded-lg mb-4">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-lg">{section.title}</span>
-          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-            {section.section_type}
-          </span>
-          <span className="text-xs text-gray-400">{section.items.length} items</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="text-gray-500 hover:text-gray-700 text-sm"
-          >
-            {collapsed ? "Expand" : "Collapse"}
-          </button>
-          <button onClick={onDeleteSection} className="text-red-400 hover:text-red-600 text-sm">
-            Delete
-          </button>
-        </div>
-      </div>
-
-      {!collapsed && (
-        <div className="p-4 space-y-3">
-          {section.items.map((item) => (
-            <ProfileItemCard
-              key={item.id}
-              item={item}
-              sectionType={section.section_type}
-              onUpdate={(data) => onUpdateItem(item.id, data)}
-              onDelete={() => onDeleteItem(item.id)}
+          <div className="flex gap-2">
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept=".pdf,.tex" 
+              onChange={handleImport}
             />
-          ))}
-          <button
-            onClick={onAddItem}
-            className="text-sm text-blue-600 hover:text-blue-700"
-          >
-            + Add {section.section_type === "skills" ? "category" : "entry"}
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// --- Profile Item Card ---
-
-function ProfileItemCard({
-  item,
-  sectionType,
-  onUpdate,
-  onDelete,
-}: {
-  item: ProfileItem;
-  sectionType: string;
-  onUpdate: (data: Record<string, unknown>) => void;
-  onDelete: () => void;
-}) {
-  const [form, setForm] = useState<Record<string, unknown>>(item.data);
-  const [dirty, setDirty] = useState(false);
-
-  useEffect(() => { setForm(item.data); }, [item.data]);
-
-  const updateField = (key: string, value: unknown) => {
-    const updated = { ...form, [key]: value };
-    setForm(updated);
-    setDirty(true);
-  };
-
-  const handleSave = () => {
-    onUpdate(form);
-    setDirty(false);
-  };
-
-  const renderFields = () => {
-    switch (sectionType) {
-      case "experience":
-        return <ExperienceItemFields form={form} onChange={updateField} />;
-      case "education":
-        return <EducationItemFields form={form} onChange={updateField} />;
-      case "project":
-        return <ProjectItemFields form={form} onChange={updateField} />;
-      case "skills":
-        return <SkillsItemFields form={form} onChange={updateField} />;
-      default:
-        return <GenericItemFields form={form} onChange={updateField} />;
-    }
-  };
-
-  const label =
-    sectionType === "experience"
-      ? (form.role as string) || (form.company as string) || "New Experience"
-      : sectionType === "education"
-        ? (form.institution as string) || (form.degree as string) || "New Education"
-        : sectionType === "project"
-          ? (form.name as string) || "New Project"
-          : sectionType === "skills"
-            ? (form.category as string) || "New Category"
-            : (form.text as string) || "New Item";
-
-  return (
-    <div className="border border-gray-200 rounded-md p-3">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-gray-700 truncate">{label}</span>
-        <div className="flex gap-2">
-          {dirty && (
-            <button
-              onClick={handleSave}
-              className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm"
             >
-              Save
+              Import from PDF/LaTeX
             </button>
-          )}
-          <button onClick={onDelete} className="text-xs text-red-400 hover:text-red-600">
-            Remove
-          </button>
+          </div>
+        </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 gap-8">
+          {/* Personal Info */}
+          <section className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+              <h3 className="font-bold text-gray-900 text-lg">Contact Information</h3>
+            </div>
+            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <ProfileInput label="Full Name" value={profile.name} onChange={(val) => handleUpdate({ name: val })} />
+              <ProfileInput label="Email" value={profile.email} onChange={(val) => handleUpdate({ email: val })} />
+              <ProfileInput label="Phone" value={profile.phone} onChange={(val) => handleUpdate({ phone: val })} />
+              <ProfileInput label="LinkedIn" value={profile.linkedin || ""} onChange={(val) => handleUpdate({ linkedin: val })} />
+              <ProfileInput label="GitHub" value={profile.github || ""} onChange={(val) => handleUpdate({ github: val })} />
+              <ProfileInput label="Website" value={profile.website || ""} onChange={(val) => handleUpdate({ website: val })} />
+            </div>
+          </section>
+
+          {/* Experience */}
+          <ProfileSectionList<Experience>
+            title="Professional Experience"
+            items={profile.experiences}
+            onUpdate={(items) => handleUpdate({ experiences: items })}
+            renderItem={(item, onUpdate, onDelete) => (
+              <ExperienceItemEditor item={item} onUpdate={onUpdate} onDelete={onDelete} />
+            )}
+            newItem={() => ({
+              id: uuidv4(),
+              company: "",
+              role: "",
+              location: "",
+              start: "",
+              end: "",
+              tags: [],
+              bullets: []
+            })}
+          />
+
+          {/* Education */}
+          <ProfileSectionList<Education>
+            title="Education"
+            items={profile.education}
+            onUpdate={(items) => handleUpdate({ education: items })}
+            renderItem={(item, onUpdate, onDelete) => (
+              <EducationItemEditor item={item} onUpdate={onUpdate} onDelete={onDelete} />
+            )}
+            newItem={() => ({
+              id: uuidv4(),
+              institution: "",
+              degree: "",
+              location: "",
+              end: "",
+              gpa: null,
+              coursework: null,
+              awards: null
+            })}
+          />
+
+          {/* Projects */}
+          <ProfileSectionList<Project>
+            title="Projects"
+            items={profile.projects}
+            onUpdate={(items) => handleUpdate({ projects: items })}
+            renderItem={(item, onUpdate, onDelete) => (
+              <ProjectItemEditor item={item} onUpdate={onUpdate} onDelete={onDelete} />
+            )}
+            newItem={() => ({
+              id: uuidv4(),
+              name: "",
+              tech_stack: "",
+              date: "",
+              tags: [],
+              bullets: []
+            })}
+          />
+
+          {/* Skills */}
+          <ProfileSectionList<SkillCategory>
+            title="Skills"
+            items={profile.skill_categories}
+            onUpdate={(items) => handleUpdate({ skill_categories: items })}
+            renderItem={(item, onUpdate, onDelete) => (
+              <SkillCategoryEditor item={item} onUpdate={onUpdate} onDelete={onDelete} />
+            )}
+            newItem={() => ({
+              id: uuidv4(),
+              name: "",
+              items: [],
+              tags: []
+            })}
+          />
         </div>
       </div>
-      {renderFields()}
     </div>
   );
 }
 
-// --- Field Components ---
+// --- Helper Components ---
 
-function Input({
-  label,
-  value,
-  onChange,
-  placeholder,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-}) {
+function ProfileInput({ label, value, onChange, placeholder }: { label: string, value: string, onChange: (v: string) => void, placeholder?: string }) {
   return (
     <div>
-      <label className="block text-xs text-gray-500 mb-0.5">{label}</label>
+      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">{label}</label>
       <input
-        value={value || ""}
+        type="text"
+        value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm"
       />
     </div>
   );
 }
 
-function BulletList({
-  label,
-  items,
-  onChange,
-}: {
-  label: string;
-  items: string[];
-  onChange: (items: string[]) => void;
-}) {
-  const bullets = items || [];
+interface SectionListProps<T> {
+  title: string;
+  items: T[];
+  onUpdate: (items: T[]) => void;
+  renderItem: (item: T, onUpdate: (item: T) => void, onDelete: () => void) => React.ReactNode;
+  newItem: () => T;
+}
+
+function ProfileSectionList<T extends { id: string }>({ title, items, onUpdate, renderItem, newItem }: SectionListProps<T>) {
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  const handleUpdateItem = (updatedItem: T) => {
+    onUpdate(items.map(i => i.id === updatedItem.id ? updatedItem : i));
+  };
+
+  const handleDeleteItem = (id: string) => {
+    onUpdate(items.filter(i => i.id !== id));
+  };
+
+  const handleAdd = () => {
+    onUpdate([...items, newItem()]);
+  };
+
   return (
-    <div className="col-span-2">
-      <label className="block text-xs text-gray-500 mb-0.5">{label}</label>
-      {bullets.map((b, i) => (
-        <div key={i} className="flex items-center gap-1 mb-1">
-          <span className="text-gray-400 text-xs">-</span>
-          <input
-            value={b}
-            onChange={(e) => {
-              const updated = [...bullets];
-              updated[i] = e.target.value;
-              onChange(updated);
-            }}
-            className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-          <button
-            onClick={() => onChange(bullets.filter((_, idx) => idx !== i))}
-            className="text-red-400 hover:text-red-600 text-xs px-1"
+    <section className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div 
+        className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center cursor-pointer hover:bg-gray-100/50 transition-colors"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center gap-3">
+          <h3 className="font-bold text-gray-900 text-lg">{title}</h3>
+          <span className="text-xs font-semibold bg-gray-200 text-gray-600 px-2.5 py-1 rounded-full">{items.length}</span>
+        </div>
+        <button className="text-gray-400 hover:text-gray-600 transition-colors">
+          {isExpanded ? 'Collapse' : 'Expand'}
+        </button>
+      </div>
+
+      {isExpanded && (
+        <div className="p-6">
+          <div className="flex flex-col gap-6">
+            {items.map((item, index) => (
+              <div key={`${item.id}-${index}`}>
+                {renderItem(
+                  item, 
+                  handleUpdateItem, 
+                  () => handleDeleteItem(item.id)
+                )}
+              </div>
+            ))}
+          </div>
+          <button 
+            onClick={handleAdd}
+            className="mt-6 w-full py-4 border-2 border-dashed border-gray-200 rounded-xl text-gray-400 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all font-medium flex items-center justify-center gap-2"
           >
-            x
+            <span className="text-xl">+</span> Add {title.replace('Professional ', '').slice(0, -1)}
           </button>
         </div>
-      ))}
-      <button
-        onClick={() => onChange([...bullets, ""])}
-        className="text-xs text-blue-600 hover:text-blue-700"
-      >
-        + Add bullet
-      </button>
-    </div>
-  );
-}
-
-function ExperienceItemFields({
-  form,
-  onChange,
-}: {
-  form: Record<string, unknown>;
-  onChange: (key: string, value: unknown) => void;
-}) {
-  return (
-    <div className="grid grid-cols-2 gap-2">
-      <Input label="Role" value={form.role as string} onChange={(v) => onChange("role", v)} />
-      <Input label="Company" value={form.company as string} onChange={(v) => onChange("company", v)} />
-      <Input label="Location" value={form.location as string} onChange={(v) => onChange("location", v)} />
-      <div className="flex gap-2">
-        <Input label="Start" value={form.start_date as string} onChange={(v) => onChange("start_date", v)} placeholder="Jan 2023" />
-        <Input label="End" value={form.end_date as string} onChange={(v) => onChange("end_date", v)} placeholder="Present" />
-      </div>
-      <BulletList label="Bullets" items={(form.bullets as string[]) || []} onChange={(v) => onChange("bullets", v)} />
-    </div>
-  );
-}
-
-function EducationItemFields({
-  form,
-  onChange,
-}: {
-  form: Record<string, unknown>;
-  onChange: (key: string, value: unknown) => void;
-}) {
-  return (
-    <div className="grid grid-cols-2 gap-2">
-      <Input label="Institution" value={form.institution as string} onChange={(v) => onChange("institution", v)} />
-      <Input label="Degree" value={form.degree as string} onChange={(v) => onChange("degree", v)} />
-      <Input label="Location" value={form.location as string} onChange={(v) => onChange("location", v)} />
-      <div className="flex gap-2">
-        <Input label="Start" value={form.start_date as string} onChange={(v) => onChange("start_date", v)} placeholder="Aug 2019" />
-        <Input label="End" value={form.end_date as string} onChange={(v) => onChange("end_date", v)} placeholder="May 2023" />
-      </div>
-      <BulletList label="Details" items={(form.details as string[]) || []} onChange={(v) => onChange("details", v)} />
-    </div>
-  );
-}
-
-function ProjectItemFields({
-  form,
-  onChange,
-}: {
-  form: Record<string, unknown>;
-  onChange: (key: string, value: unknown) => void;
-}) {
-  return (
-    <div className="grid grid-cols-2 gap-2">
-      <Input label="Name" value={form.name as string} onChange={(v) => onChange("name", v)} />
-      <Input label="Tech Stack" value={form.tech_stack as string} onChange={(v) => onChange("tech_stack", v)} />
-      <Input label="URL" value={form.url as string} onChange={(v) => onChange("url", v)} />
-      <div />
-      <BulletList label="Bullets" items={(form.bullets as string[]) || []} onChange={(v) => onChange("bullets", v)} />
-    </div>
-  );
-}
-
-function SkillsItemFields({
-  form,
-  onChange,
-}: {
-  form: Record<string, unknown>;
-  onChange: (key: string, value: unknown) => void;
-}) {
-  const items = (form.items as string[]) || [];
-  return (
-    <div className="grid grid-cols-2 gap-2">
-      <Input label="Category" value={form.category as string} onChange={(v) => onChange("category", v)} placeholder="Languages" />
-      <div>
-        <label className="block text-xs text-gray-500 mb-0.5">Items (comma-separated)</label>
-        <input
-          value={items.join(", ")}
-          onChange={(e) => onChange("items", e.target.value.split(",").map((s) => s.trim()))}
-          placeholder="Python, JavaScript, Go"
-          className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-      </div>
-    </div>
-  );
-}
-
-function GenericItemFields({
-  form,
-  onChange,
-}: {
-  form: Record<string, unknown>;
-  onChange: (key: string, value: unknown) => void;
-}) {
-  return (
-    <Input label="Text" value={form.text as string} onChange={(v) => onChange("text", v)} placeholder="Enter text..." />
-  );
-}
-
-// --- Add Section Menu ---
-
-function AddSectionMenu({ onAdd }: { onAdd: (type: string) => void }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-blue-400 hover:text-blue-600 transition-colors"
-      >
-        + Add Section
-      </button>
-      {open && (
-        <div className="absolute top-full mt-1 left-0 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-          {SECTION_TYPES.map((opt) => (
-            <button
-              key={opt.type}
-              onClick={() => { onAdd(opt.type); setOpen(false); }}
-              className="w-full px-4 py-2 text-left hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
       )}
+    </section>
+  );
+}
+
+// --- Item Editors ---
+
+function ExperienceItemEditor({ item, onUpdate, onDelete }: { item: Experience, onUpdate: (i: Experience) => void, onDelete: () => void }) {
+  const updateField = (field: keyof Experience, value: any) => {
+    onUpdate({ ...item, [field]: value });
+  };
+
+  return (
+    <div className="group border border-gray-200 rounded-xl p-6 bg-white hover:border-blue-300 hover:shadow-md transition-all relative">
+      <button 
+        onClick={onDelete}
+        className="absolute top-4 right-4 text-gray-300 hover:text-red-600 transition-colors"
+      >
+        Remove
+      </button>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <ProfileInput label="Company" value={item.company} onChange={(v) => updateField('company', v)} />
+        <ProfileInput label="Role" value={item.role} onChange={(v) => updateField('role', v)} />
+        <ProfileInput label="Location" value={item.location} onChange={(v) => updateField('location', v)} />
+        <div className="flex gap-4">
+          <ProfileInput label="Start" value={item.start} onChange={(v) => updateField('start', v)} placeholder="MM/YYYY" />
+          <ProfileInput label="End" value={item.end} onChange={(v) => updateField('end', v)} placeholder="MM/YYYY or Present" />
+        </div>
+      </div>
+
+      <BulletEditor bullets={item.bullets} onUpdate={(b) => updateField('bullets', b)} />
+    </div>
+  );
+}
+
+function EducationItemEditor({ item, onUpdate, onDelete }: { item: Education, onUpdate: (i: Education) => void, onDelete: () => void }) {
+  const updateField = (field: keyof Education, value: any) => {
+    onUpdate({ ...item, [field]: value });
+  };
+
+  return (
+    <div className="group border border-gray-200 rounded-xl p-6 bg-white hover:border-blue-300 hover:shadow-md transition-all relative">
+      <button 
+        onClick={onDelete}
+        className="absolute top-4 right-4 text-gray-300 hover:text-red-600 transition-colors"
+      >
+        Remove
+      </button>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ProfileInput label="Institution" value={item.institution} onChange={(v) => updateField('institution', v)} />
+        <ProfileInput label="Degree" value={item.degree} onChange={(v) => updateField('degree', v)} />
+        <ProfileInput label="Location" value={item.location} onChange={(v) => updateField('location', v)} />
+        <ProfileInput label="End Date" value={item.end} onChange={(v) => updateField('end', v)} placeholder="MM/YYYY" />
+        <ProfileInput label="GPA" value={item.gpa || ""} onChange={(v) => updateField('gpa', v)} />
+        <ProfileInput label="Coursework" value={item.coursework || ""} onChange={(v) => updateField('coursework', v)} />
+      </div>
+    </div>
+  );
+}
+
+function ProjectItemEditor({ item, onUpdate, onDelete }: { item: Project, onUpdate: (i: Project) => void, onDelete: () => void }) {
+  const updateField = (field: keyof Project, value: any) => {
+    onUpdate({ ...item, [field]: value });
+  };
+
+  return (
+    <div className="group border border-gray-200 rounded-xl p-6 bg-white hover:border-blue-300 hover:shadow-md transition-all relative">
+      <button 
+        onClick={onDelete}
+        className="absolute top-4 right-4 text-gray-300 hover:text-red-600 transition-colors"
+      >
+        Remove
+      </button>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <ProfileInput label="Project Name" value={item.name} onChange={(v) => updateField('name', v)} />
+        <ProfileInput label="Tech Stack" value={item.tech_stack} onChange={(v) => updateField('tech_stack', v)} placeholder="React, Python, etc." />
+        <ProfileInput label="Date" value={item.date} onChange={(v) => updateField('date', v)} placeholder="MM/YYYY" />
+      </div>
+
+      <BulletEditor bullets={item.bullets} onUpdate={(b) => updateField('bullets', b)} />
+    </div>
+  );
+}
+
+function SkillCategoryEditor({ item, onUpdate, onDelete }: { item: SkillCategory, onUpdate: (i: SkillCategory) => void, onDelete: () => void }) {
+  return (
+    <div className="group border border-gray-200 rounded-xl p-6 bg-white hover:border-blue-300 hover:shadow-md transition-all relative">
+      <button 
+        onClick={onDelete}
+        className="absolute top-4 right-4 text-gray-300 hover:text-red-600 transition-colors"
+      >
+        Remove
+      </button>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ProfileInput label="Category" value={item.name} onChange={(v) => onUpdate({ ...item, name: v })} placeholder="Languages, Frameworks, etc." />
+        <div>
+          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Items (comma separated)</label>
+          <input
+            type="text"
+            value={item.items.join(', ')}
+            onChange={(e) => onUpdate({ ...item, items: e.target.value.split(',').map(s => s.trim()).filter(s => s) })}
+            placeholder="Python, JavaScript, SQL"
+            className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BulletEditor({ bullets, onUpdate }: { bullets: Bullet[], onUpdate: (b: Bullet[]) => void }) {
+  const handleUpdateBullet = (id: string, text: string) => {
+    onUpdate(bullets.map(b => b.id === id ? { ...b, text } : b));
+  };
+
+  const handleAdd = () => {
+    onUpdate([...bullets, { id: uuidv4(), text: "", tags: [], order: bullets.length }]);
+  };
+
+  const handleDelete = (id: string) => {
+    onUpdate(bullets.filter(b => b.id !== id));
+  };
+
+  return (
+    <div className="mt-4">
+      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Bullet Points</label>
+      <div className="space-y-2">
+        {bullets.map((bullet, idx) => (
+          <div key={bullet.id} className="flex gap-2 group/bullet">
+            <span className="text-gray-300 pt-2.5 select-none font-medium">{idx + 1}.</span>
+            <textarea
+              value={bullet.text}
+              onChange={(e) => handleUpdateBullet(bullet.id, e.target.value)}
+              className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none h-10 min-h-[40px] focus:h-24 hover:bg-white focus:bg-white"
+              rows={1}
+            />
+            <button 
+              onClick={() => handleDelete(bullet.id)}
+              className="text-gray-300 hover:text-red-500 opacity-0 group-hover/bullet:opacity-100 transition-opacity p-2"
+            >
+              &times;
+            </button>
+          </div>
+        ))}
+        <button 
+          onClick={handleAdd}
+          className="text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1 mt-2"
+        >
+          <span>+</span> Add Bullet Point
+        </button>
+      </div>
     </div>
   );
 }

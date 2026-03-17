@@ -1,3 +1,4 @@
+import os
 from pydantic_settings import BaseSettings
 
 
@@ -7,7 +8,7 @@ class Settings(BaseSettings):
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "llama3.2:3b"
     cors_origins: str = "http://localhost:3000"
-    tectonic_path: str = "tectonic"
+    tectonic_path: str = os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "tectonic")
     access_token_expire_hours: int = 24
 
     model_config = {"env_file": ".env", "extra": "ignore"}

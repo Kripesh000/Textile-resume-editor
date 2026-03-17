@@ -1,0 +1,16 @@
+{
+  "id": "modern_blue",
+  "name": "Modern Blue Minimalist",
+  "tags": ["modern", "color", "clean"],
+  "max_experiences": 5,
+  "max_projects": 4,
+  "max_skill_categories": 5,
+  "supports": {
+    "summary": false,
+    "photo": false,
+    "color_accent": true,
+    "two_column_skills": false
+  },
+  "section_order_locked": false,
+  "required_sections": ["Experience"]
+}

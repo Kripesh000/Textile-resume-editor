@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -26,8 +26,40 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return res.json();
 }
 
-// Auth
+import { User, Profile, ResumeVariant, TemplateConfig, ImproviseResponse, Resume, ResumeListItem, ProfileSection } from "./types";
+
+function mapProfileToLegacy(p: Profile): Profile {
+  const sections: ProfileSection[] = [
+    {
+      id: "legacy-exp",
+      title: "Experience",
+      section_type: "experience",
+      items: (p.experiences || []).map(e => ({ id: e.id, data: e }))
+    },
+    {
+      id: "legacy-edu",
+      title: "Education",
+      section_type: "education",
+      items: (p.education || []).map(e => ({ id: e.id, data: e }))
+    },
+    {
+      id: "legacy-proj",
+      title: "Projects",
+      section_type: "projects",
+      items: (p.projects || []).map(pj => ({ id: pj.id, data: pj }))
+    },
+    {
+      id: "legacy-skills",
+      title: "Skills",
+      section_type: "skills",
+      items: (p.skill_categories || []).map(s => ({ id: s.id, data: s }))
+    }
+  ];
+  return { ...p, sections };
+}
+
 export const api = {
+  // Auth
   register: (data: { email: string; name: string; password: string }) =>
     request<{ id: string; email: string; name: string }>("/api/v1/auth/register", {
       method: "POST",
@@ -40,51 +72,44 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
-  getMe: () => request<{ id: string; email: string; name: string }>("/api/v1/auth/me"),
+  getMe: () => request<User>("/api/v1/auth/me"),
 
-  // Resumes
-  listResumes: () =>
-    request<{ id: string; title: string; template_key: string; created_at: string; updated_at: string }[]>(
-      "/api/v1/resumes"
-    ),
+  // Profile
+  getProfile: () => request<Profile>("/api/v1/profile").then(mapProfileToLegacy),
 
-  createResume: (data: { title?: string; template_key?: string }) =>
-    request("/api/v1/resumes", { method: "POST", body: JSON.stringify(data) }),
-
-  getResume: (id: string) => request<import("./types").Resume>(`/api/v1/resumes/${id}`),
-
-  updateResume: (id: string, data: { title?: string; template_key?: string; header_data?: Record<string, string> }) =>
-    request(`/api/v1/resumes/${id}`, { method: "PUT", body: JSON.stringify(data) }),
-
-  deleteResume: (id: string) =>
-    request(`/api/v1/resumes/${id}`, { method: "DELETE" }),
-
-  // Sections
-  createSection: (resumeId: string, data: { section_type: string; title: string; order_index: number }) =>
-    request<import("./types").Section>(`/api/v1/resumes/${resumeId}/sections`, {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
-
-  updateSection: (resumeId: string, sectionId: string, data: { title?: string; items?: unknown[] }) =>
-    request<import("./types").Section>(`/api/v1/resumes/${resumeId}/sections/${sectionId}`, {
+  updateProfile: (data: Profile) =>
+    request<Profile>("/api/v1/profile", {
       method: "PUT",
       body: JSON.stringify(data),
-    }),
+    }).then(mapProfileToLegacy),
 
-  deleteSection: (resumeId: string, sectionId: string) =>
-    request(`/api/v1/resumes/${resumeId}/sections/${sectionId}`, { method: "DELETE" }),
-
-  reorderSections: (resumeId: string, items: { section_id: string; order_index: number }[]) =>
-    request(`/api/v1/resumes/${resumeId}/sections/reorder`, {
-      method: "PUT",
-      body: JSON.stringify(items),
-    }),
-
-  // PDF
-  generatePdf: async (resumeId: string): Promise<Blob> => {
+  importResume: async (file: File): Promise<Profile> => {
     const token = getToken();
-    const res = await fetch(`${API_BASE}/api/v1/resumes/${resumeId}/pdf`, {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`${API_BASE}/api/v1/profile/import`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(body.detail || "Import failed");
+    }
+    return res.json().then(mapProfileToLegacy);
+  },
+
+  // Templates
+  listTemplates: () => request<TemplateConfig[]>("/api/v1/templates"),
+  getTemplate: (id: string) => request<TemplateConfig>(`/api/v1/templates/${id}`),
+  getTemplateThumbnailUrl: (id: string) => `${API_BASE}/api/v1/templates/${id}/thumbnail`,
+
+  // Variants
+  listVariants: () => request<ResumeVariant[]>("/api/v1/variants"), // Note: Need to make sure this exists or use profile variants
+  
+  renderVariant: async (variantId: string): Promise<Blob> => {
+    const token = getToken();
+    const res = await fetch(`${API_BASE}/api/v1/variants/${variantId}/render`, {
       method: "POST",
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
@@ -95,78 +120,77 @@ export const api = {
     return res.blob();
   },
 
-  // Upload
-  uploadResume: async (file: File): Promise<import("./types").Resume> => {
-    const token = getToken();
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await fetch(`${API_BASE}/api/v1/resumes/upload`, {
+  // AI
+  improvise: (data: { text: string; context?: { role?: string; company?: string; section_type?: string } }) =>
+    request<ImproviseResponse>("/api/v1/ai/improvise", {
       method: "POST",
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      body: formData,
+      body: JSON.stringify(data),
+    }),
+
+  // Legacy / Compatibility methods
+  listResumes: () => request<any[]>("/api/v1/variants").then(list => list.map(v => ({ ...v, title: v.name, template_key: v.template_id }))),
+  getResume: (id: string) => request<any>(`/api/v1/variants/${id}`).then(v => ({ ...v, title: v.name, template_key: v.template_id })),
+  createResume: (data: any) => request<Resume>("/api/v1/variants", {
+    method: "POST",
+    body: JSON.stringify({ ...data, name: data.title || "New Resume", template_id: "jake_classic" }),
+  }),
+  updateResume: (id: string, data: any) => request<Resume>(`/api/v1/variants/${id}`, {
+    method: "PUT",
+    // Map template_key to template_id for the backend
+    body: JSON.stringify({ ...data, name: data.title, ...(data.template_key ? { template_id: data.template_key } : {}) }),
+  }),
+  deleteResume: (id: string) => request<void>(`/api/v1/variants/${id}`, {
+    method: "DELETE",
+  }),
+  
+  createSection: (resumeId: string, data: any) => 
+    request<any>(`/api/v1/variants/${resumeId}/sections`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateSection: (resumeId: string, sectionId: string, data: any) => 
+    request<any>(`/api/v1/variants/${resumeId}/sections/${sectionId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  deleteSection: (resumeId: string, sectionId: string) => 
+    request<any>(`/api/v1/variants/${resumeId}/sections/${sectionId}`, {
+      method: "DELETE",
+    }),
+  reorderSections: (resumeId: string, data: any) => 
+    request<any>(`/api/v1/variants/${resumeId}/reorder`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  uploadResume: async (file: File) => {
+    const profile = await api.importResume(file);
+    const variant = await api.createResume({ title: "Imported Resume" });
+    return variant;
+  },
+  uploadLatex: async (file: File) => {
+    const profile = await api.importResume(file);
+    const variant = await api.createResume({ title: "Imported LaTeX Resume" });
+    return variant;
+  },
+  generatePdf: async (id: string): Promise<Blob> => {
+    const token = getToken();
+    const headers: Record<string, string> = {
+      ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+    };
+    const res = await fetch(`${API_BASE}/api/v1/variants/${id}/render`, {
+      method: "POST",
+      headers,
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({ detail: res.statusText }));
-      throw new Error(body.detail || "Upload failed");
+      throw new Error(body.detail || "PDF generation failed");
     }
-    return res.json();
+    return res.blob();
   },
-
-  // Profile
-  getProfile: () => request<import("./types").Profile>("/api/v1/profile"),
-
-  updatePersonalInfo: (data: Partial<import("./types").PersonalInfo>) =>
-    request<import("./types").PersonalInfo>("/api/v1/profile/personal", {
-      method: "PUT",
-      body: JSON.stringify(data),
-    }),
-
-  createProfileSection: (data: { section_type: string; title: string; order_index?: number }) =>
-    request<import("./types").ProfileSection>("/api/v1/profile/sections", {
+  importToResume: (data: { resume_id: string; item_ids: string[] }) => 
+    request<any>(`/api/v1/variants/${data.resume_id}/import`, {
       method: "POST",
-      body: JSON.stringify(data),
-    }),
-
-  updateProfileSection: (sectionId: string, data: { title?: string; order_index?: number }) =>
-    request<import("./types").ProfileSection>(`/api/v1/profile/sections/${sectionId}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    }),
-
-  deleteProfileSection: (sectionId: string) =>
-    request(`/api/v1/profile/sections/${sectionId}`, { method: "DELETE" }),
-
-  createProfileItem: (sectionId: string, data: { data: Record<string, unknown>; order_index?: number }) =>
-    request<import("./types").ProfileItem>(`/api/v1/profile/sections/${sectionId}/items`, {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
-
-  updateProfileItem: (itemId: string, data: { data?: Record<string, unknown>; order_index?: number }) =>
-    request<import("./types").ProfileItem>(`/api/v1/profile/items/${itemId}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    }),
-
-  deleteProfileItem: (itemId: string) =>
-    request(`/api/v1/profile/items/${itemId}`, { method: "DELETE" }),
-
-  importToResume: (data: { resume_id: string; section_id: string; item_ids: string[] }) =>
-    request<{ status: string; imported: number }>("/api/v1/profile/import-to-resume", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
-
-  saveToProfile: (data: { resume_id: string; section_id: string }) =>
-    request<{ status: string; added: number; section_type: string }>("/api/v1/profile/save-from-resume", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
-
-  // AI
-  improvise: (data: { text: string; context?: { role?: string; company?: string; section_type?: string } }) =>
-    request<import("./types").ImproviseResponse>("/api/v1/ai/improvise", {
-      method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify(data.item_ids),
     }),
 };

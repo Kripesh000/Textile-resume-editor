@@ -37,7 +37,7 @@ latex_env = jinja2.Environment(
     variable_end_string="}",
     comment_start_string=r"\#{",
     comment_end_string="}",
-    line_statement_prefix="%%",
+    line_statement_prefix="%%j2",
     line_comment_prefix="%#",
     trim_blocks=True,
     autoescape=False,
@@ -47,7 +47,16 @@ latex_env.filters["escape_latex"] = escape_latex
 
 
 def render_template(template_key: str, data: dict) -> str:
-    template = latex_env.get_template(f"{template_key}.tex.j2")
+    # Try directory-based structure first (e.g., jake_classic/template.tex.j2)
+    try:
+        template = latex_env.get_template(f"{template_key}/template.tex.j2")
+    except jinja2.TemplateNotFound:
+        # Fallback to flat-file structure (e.g., custom.tex.j2)
+        try:
+            template = latex_env.get_template(f"{template_key}.tex.j2")
+        except jinja2.TemplateNotFound:
+            raise jinja2.TemplateNotFound(f"Template '{template_key}' not found in directory or flat-file format.")
+            
     return template.render(**data)
 
 

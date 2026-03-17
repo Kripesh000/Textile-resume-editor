@@ -1,10 +1,10 @@
 "use client";
 
-import { GenericItem } from "@/lib/types";
+import { SectionItem } from "@/lib/types";
 
 interface GenericFieldsProps {
-  items: GenericItem[];
-  onChange: (items: GenericItem[]) => void;
+  items: SectionItem[];
+  onChange: (items: SectionItem[]) => void;
   resumeId: string;
   sectionType: string;
 }
@@ -12,16 +12,16 @@ interface GenericFieldsProps {
 export default function GenericFields({ items, onChange }: GenericFieldsProps) {
   const updateItem = (index: number, value: string) => {
     const updated = [...items];
-    updated[index] = { text: value };
+    updated[index] = { ...updated[index], text: value };
     onChange(updated);
   };
 
   const addItem = () => {
-    onChange([...items, { text: "" }]);
+    onChange([...items, { id: Date.now().toString(), text: "" }]);
   };
 
   const removeItem = (index: number) => {
-    onChange(items.filter((_, i) => i !== index));
+    onChange(items.filter((_: unknown, i: number) => i !== index));
   };
 
   return (
@@ -30,7 +30,7 @@ export default function GenericFields({ items, onChange }: GenericFieldsProps) {
         <div key={i} className="flex items-center gap-1">
           <span className="text-gray-700 text-xs">-</span>
           <input
-            value={item.text}
+            value={item.text || ""}
             onChange={(e) => updateItem(i, e.target.value)}
             placeholder="Enter text..."
             className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"

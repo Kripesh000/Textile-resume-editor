@@ -1,0 +1,254 @@
+%-------------------------
+% Resume in Latex
+% Author : Jake Gutierrez
+% Based off of: https://github.com/sb2nov/resume
+% License : MIT
+%------------------------
+
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+% \input{glyphtounicode}
+
+
+%----------FONT OPTIONS----------
+% sans-serif
+% \usepackage[sfdefault]{FiraSans}
+% \usepackage[sfdefault]{roboto}
+% \usepackage[sfdefault]{noto-sans}
+% \usepackage[default]{sourcesanspro}
+
+% serif
+% \usepackage{CormorantGaramond}
+% \usepackage{charter}
+
+
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footer fields
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% Ensure that generate pdf is machine readable/ATS parsable
+% \pdfgentounicode=1
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubSubheading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \textit{\small#1} & \textit{\small #2} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \small#1 & #2 \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+%-------------------------------------------
+%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+
+\begin{center}
+    \textbf{\Huge \scshape \VAR{header.name | escape_latex}} \\ \vspace{1pt}
+    \small Nashville, TN $|$
+    \small \VAR{header.phone | escape_latex} $|$ \href{mailto:\VAR{header.email | escape_latex}}{\underline{\VAR{header.email | escape_latex}}} $|$ 
+    \href{https://www.linkedin.com/in/pratyushkhanal/}{\underline{Linkedin}} $|$
+    \href{https://github.com/Khanalpratyush}{\underline{Github}}
+\end{center}
+
+
+%-----------EDUCATION-----------
+\section{Education}
+%%j2 if sections|length > 0
+%%j2 set section = sections[0]
+\begin{itemize}
+%%j2 for item in section.items
+%%j2 if item.company
+  \item \textbf{\VAR{item.company | escape_latex}} -- \VAR{item.role | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.institution
+  \item \textbf{\VAR{item.institution | escape_latex}} -- \VAR{item.degree | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.name
+  \item \textbf{\VAR{item.name | escape_latex}} $|$ \VAR{item.tech_stack | escape_latex}
+%%j2 elif item.category
+  \item \textbf{\VAR{item.category | escape_latex}}: \VAR{item.items | join(', ') | escape_latex}
+%%j2 elif item.text
+  \item \VAR{item.text | escape_latex}
+%%j2 endif
+%%j2 if item.bullets
+  \begin{itemize}
+  %%j2 for bullet in item.bullets
+    \item \VAR{bullet | escape_latex}
+  %%j2 endfor
+  \end{itemize}
+%%j2 endif
+%%j2 endfor
+\end{itemize}
+%%j2 endif
+
+\section{Technical Skills}
+%%j2 if sections|length > 1
+%%j2 set section = sections[1]
+\begin{itemize}
+%%j2 for item in section.items
+%%j2 if item.company
+  \item \textbf{\VAR{item.company | escape_latex}} -- \VAR{item.role | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.institution
+  \item \textbf{\VAR{item.institution | escape_latex}} -- \VAR{item.degree | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.name
+  \item \textbf{\VAR{item.name | escape_latex}} $|$ \VAR{item.tech_stack | escape_latex}
+%%j2 elif item.category
+  \item \textbf{\VAR{item.category | escape_latex}}: \VAR{item.items | join(', ') | escape_latex}
+%%j2 elif item.text
+  \item \VAR{item.text | escape_latex}
+%%j2 endif
+%%j2 if item.bullets
+  \begin{itemize}
+  %%j2 for bullet in item.bullets
+    \item \VAR{bullet | escape_latex}
+  %%j2 endfor
+  \end{itemize}
+%%j2 endif
+%%j2 endfor
+\end{itemize}
+%%j2 endif
+
+\section{Experience}
+%%j2 if sections|length > 2
+%%j2 set section = sections[2]
+\begin{itemize}
+%%j2 for item in section.items
+%%j2 if item.company
+  \item \textbf{\VAR{item.company | escape_latex}} -- \VAR{item.role | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.institution
+  \item \textbf{\VAR{item.institution | escape_latex}} -- \VAR{item.degree | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.name
+  \item \textbf{\VAR{item.name | escape_latex}} $|$ \VAR{item.tech_stack | escape_latex}
+%%j2 elif item.category
+  \item \textbf{\VAR{item.category | escape_latex}}: \VAR{item.items | join(', ') | escape_latex}
+%%j2 elif item.text
+  \item \VAR{item.text | escape_latex}
+%%j2 endif
+%%j2 if item.bullets
+  \begin{itemize}
+  %%j2 for bullet in item.bullets
+    \item \VAR{bullet | escape_latex}
+  %%j2 endfor
+  \end{itemize}
+%%j2 endif
+%%j2 endfor
+\end{itemize}
+%%j2 endif
+
+\section{Projects}
+%%j2 if sections|length > 3
+%%j2 set section = sections[3]
+\begin{itemize}
+%%j2 for item in section.items
+%%j2 if item.company
+  \item \textbf{\VAR{item.company | escape_latex}} -- \VAR{item.role | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.institution
+  \item \textbf{\VAR{item.institution | escape_latex}} -- \VAR{item.degree | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.name
+  \item \textbf{\VAR{item.name | escape_latex}} $|$ \VAR{item.tech_stack | escape_latex}
+%%j2 elif item.category
+  \item \textbf{\VAR{item.category | escape_latex}}: \VAR{item.items | join(', ') | escape_latex}
+%%j2 elif item.text
+  \item \VAR{item.text | escape_latex}
+%%j2 endif
+%%j2 if item.bullets
+  \begin{itemize}
+  %%j2 for bullet in item.bullets
+    \item \VAR{bullet | escape_latex}
+  %%j2 endfor
+  \end{itemize}
+%%j2 endif
+%%j2 endfor
+\end{itemize}
+%%j2 endif
+
+\section{Hackathons, Clubs and Activities}
+%%j2 if sections|length > 4
+%%j2 set section = sections[4]
+\begin{itemize}
+%%j2 for item in section.items
+%%j2 if item.company
+  \item \textbf{\VAR{item.company | escape_latex}} -- \VAR{item.role | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.institution
+  \item \textbf{\VAR{item.institution | escape_latex}} -- \VAR{item.degree | escape_latex} \hfill \VAR{item.start_date | escape_latex} - \VAR{item.end_date | escape_latex}
+%%j2 elif item.name
+  \item \textbf{\VAR{item.name | escape_latex}} $|$ \VAR{item.tech_stack | escape_latex}
+%%j2 elif item.category
+  \item \textbf{\VAR{item.category | escape_latex}}: \VAR{item.items | join(', ') | escape_latex}
+%%j2 elif item.text
+  \item \VAR{item.text | escape_latex}
+%%j2 endif
+%%j2 if item.bullets
+  \begin{itemize}
+  %%j2 for bullet in item.bullets
+    \item \VAR{bullet | escape_latex}
+  %%j2 endfor
+  \end{itemize}
+%%j2 endif
+%%j2 endfor
+\end{itemize}
+%%j2 endif
+
+\end{document}

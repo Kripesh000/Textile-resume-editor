@@ -2,84 +2,105 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  created_at: string;
 }
 
-export interface ExperienceItem {
+export interface Bullet {
+  id: string;
+  text: string;
+  tags: string[];
+  order: number;
+}
+
+export interface Experience {
+  id: string;
   company: string;
   role: string;
   location: string;
-  start_date: string;
-  end_date: string;
-  bullets: string[];
+  start: string;
+  end: string;
+  tags: string[];
+  bullets: Bullet[];
 }
 
-export interface EducationItem {
+export interface Project {
+  id: string;
+  name: string;
+  tech_stack: string;
+  date: string;
+  tags: string[];
+  bullets: Bullet[];
+}
+
+export interface Education {
+  id: string;
   institution: string;
   degree: string;
   location: string;
-  start_date: string;
-  end_date: string;
-  details: string[];
+  end: string;
+  gpa: string | null;
+  coursework: string | null;
+  awards: string | null;
 }
 
-export interface ProjectItem {
-  name: string;
-  tech_stack: string;
-  url: string;
-  bullets: string[];
-}
-
-export interface SkillItem {
-  category: string;
-  items: string[];
-}
-
-export interface GenericItem {
-  text: string;
-}
-
-export type SectionItem = ExperienceItem | EducationItem | ProjectItem | SkillItem | GenericItem;
-
-export type SectionType = "education" | "experience" | "project" | "skills" | "generic";
-
-export interface Section {
+export interface SkillCategory {
   id: string;
-  resume_id: string;
-  section_type: SectionType;
-  title: string;
-  order_index: number;
-  items: SectionItem[];
-  created_at: string;
-  updated_at: string;
+  name: string;
+  items: string[];
+  tags: string[];
 }
 
-export interface HeaderData {
+export interface Profile {
+  user_id: string;
   name: string;
   email: string;
   phone: string;
-  linkedin: string;
-  github: string;
-  website: string;
+  linkedin: string | null;
+  github: string | null;
+  website: string | null;
+  experiences: Experience[];
+  projects: Project[];
+  education: Education[];
+  skill_categories: SkillCategory[];
+  sections?: ProfileSection[];
+  created_at: string;
+  updated_at: string;
 }
 
-export interface Resume {
+export interface SectionOrder {
+  title: string;
+  type: string;
+}
+
+export interface ResumeVariant {
   id: string;
   user_id: string;
-  title: string;
-  template_key: string;
-  header_data: HeaderData;
-  sections: Section[];
+  profile_id: string;
+  template_id: string;
+  name: string;
+  section_order: SectionOrder[];
+  selected_experience_ids: string[];
+  selected_project_ids: string[];
+  selected_bullet_ids: string[];
+  selected_skill_category_ids: string[];
   created_at: string;
   updated_at: string;
 }
 
-export interface ResumeListItem {
+export interface TemplateConfig {
   id: string;
-  title: string;
-  template_key: string;
-  created_at: string;
-  updated_at: string;
+  name: string;
+  tags: string[];
+  max_experiences: number;
+  max_projects: number;
+  max_skill_categories: number;
+  supports: {
+    summary: boolean;
+    photo: boolean;
+    color_accent: boolean;
+    two_column_skills: boolean;
+  };
+  section_order_locked: boolean;
+  required_sections: string[];
 }
 
 export interface ImproviseResponse {
@@ -87,61 +108,54 @@ export interface ImproviseResponse {
   alternatives: string[];
 }
 
-// --- Profile types ---
+// --- Legacy Types (to be migrated) ---
+
+export type SectionType = "experience" | "education" | "projects" | "skills" | "summary" | "generic";
+
+export interface SectionItem {
+  id: string;
+  [key: string]: any;
+}
+
+export interface Section {
+  id: string;
+  section_type: SectionType;
+  title: string;
+  order_index: number;
+  items: SectionItem[];
+}
+
+export interface Resume {
+  id: string;
+  title: string;
+  template_key: string;
+  header_data: Record<string, string>;
+  sections: Section[];
+}
+
+export interface ResumeListItem {
+  id: string;
+  title: string;
+  updated_at: string;
+}
+
+export const SECTION_DEFAULTS: Record<SectionType, any> = {
+  experience: { title: "Experience" },
+  education: { title: "Education" },
+  projects: { title: "Projects" },
+  skills: { title: "Skills" },
+  summary: { title: "Summary" },
+  generic: { title: "Other" },
+};
 
 export interface ProfileItem {
   id: string;
-  section_id: string;
-  order_index: number;
-  data: Record<string, unknown>;
-  created_at: string;
-  updated_at: string;
+  data: any;
 }
 
 export interface ProfileSection {
   id: string;
-  user_id: string;
   section_type: string;
   title: string;
-  order_index: number;
   items: ProfileItem[];
-  created_at: string;
-  updated_at: string;
 }
-
-export interface PersonalInfo {
-  name: string;
-  email: string;
-  phone: string;
-  linkedin: string;
-  github: string;
-  website: string;
-}
-
-export interface Profile {
-  personal_info: PersonalInfo;
-  sections: ProfileSection[];
-}
-
-export const SECTION_DEFAULTS: Record<SectionType, { title: string; item: SectionItem }> = {
-  education: {
-    title: "Education",
-    item: { institution: "", degree: "", location: "", start_date: "", end_date: "", details: [] },
-  },
-  experience: {
-    title: "Experience",
-    item: { company: "", role: "", location: "", start_date: "", end_date: "", bullets: [] },
-  },
-  project: {
-    title: "Projects",
-    item: { name: "", tech_stack: "", url: "", bullets: [] },
-  },
-  skills: {
-    title: "Skills",
-    item: { category: "", items: [] },
-  },
-  generic: {
-    title: "Section",
-    item: { text: "" },
-  },
-};

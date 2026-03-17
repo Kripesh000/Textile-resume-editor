@@ -1,0 +1,169 @@
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+% % \input{glyphtounicode}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% % \pdfgentounicode=1
+
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \small#1 & #2 \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+\begin{document}
+
+\begin{center}
+    \textbf{\Huge \scshape \VAR{header_data.name | escape_latex}} \\ \vspace{1pt}
+    \small \VAR{header_data.phone | escape_latex} $|$ 
+    \href{mailto:\VAR{header_data.email | escape_latex}}{\underline{\VAR{header_data.email | escape_latex}}} $|$ 
+    \BLOCK{if header_data.linkedin}
+    \href{\VAR{header_data.linkedin | escape_latex}}{\underline{\VAR{header_data.linkedin | escape_latex}}} $|$
+    \BLOCK{endif}
+    \BLOCK{if header_data.github}
+    \href{\VAR{header_data.github | escape_latex}}{\underline{\VAR{header_data.github | escape_latex}}}
+    \BLOCK{endif}
+\end{center}
+
+%%j2 for section in sections
+\BLOCK{if section.entries}
+\section{\VAR{section.title | escape_latex}}
+  
+  %%j2 if section.type == "experience"
+    \resumeSubHeadingListStart
+    %%j2 for entry in section.entries
+      \resumeSubheading
+        {\VAR{entry.company | escape_latex}}{\VAR{entry.location | escape_latex}}
+        {\VAR{entry.role | escape_latex}}{\VAR{entry.start | escape_latex} -- \VAR{entry.end | escape_latex}}
+        \BLOCK{if entry.bullets}
+        \resumeItemListStart
+        %%j2 for bullet in entry.bullets
+          \resumeItem{\VAR{bullet.text | escape_latex}}
+        %%j2 endfor
+        \resumeItemListEnd
+        \BLOCK{endif}
+    %%j2 endfor
+    \resumeSubHeadingListEnd
+    
+  %%j2 elif section.type == "project"
+    \resumeSubHeadingListStart
+    %%j2 for entry in section.entries
+      \resumeProjectHeading
+        {\textbf{\VAR{entry.name | escape_latex}} $|$ \emph{\VAR{entry.tech_stack | escape_latex}}}{\VAR{entry.date | escape_latex}}
+        \BLOCK{if entry.bullets}
+        \resumeItemListStart
+        %%j2 for bullet in entry.bullets
+          \resumeItem{\VAR{bullet.text | escape_latex}}
+        %%j2 endfor
+        \resumeItemListEnd
+        \BLOCK{endif}
+    %%j2 endfor
+    \resumeSubHeadingListEnd
+    
+  %%j2 elif section.type == "education"
+    \resumeSubHeadingListStart
+    %%j2 for entry in section.entries
+      \resumeSubheading
+        {\VAR{entry.institution | escape_latex}}{\VAR{entry.location | escape_latex}}
+        {\VAR{entry.degree | escape_latex}}{\VAR{entry.end | escape_latex}}
+        \BLOCK{if entry.gpa}
+        \resumeItemListStart
+          \resumeItem{\textbf{GPA:} \VAR{entry.gpa | escape_latex}}
+          \BLOCK{if entry.coursework}
+            \resumeItem{\textbf{Relevant Coursework:} \VAR{entry.coursework | escape_latex}}
+          \BLOCK{endif}
+          \BLOCK{if entry.awards}
+            \resumeItem{\textbf{Awards:} \VAR{entry.awards | escape_latex}}
+          \BLOCK{endif}
+        \resumeItemListEnd
+        \BLOCK{endif}
+    %%j2 endfor
+    \resumeSubHeadingListEnd
+    
+  %%j2 elif section.type == "skills"
+    \begin{itemize}[leftmargin=0.15in, label={}]
+      \small{\item{
+      %%j2 for entry in section.entries
+        \textbf{\VAR{entry.name | escape_latex}}{: \VAR{entry['items'] | join(', ') | escape_latex}} \\
+      %%j2 endfor
+      }}
+    \end{itemize}
+
+  %%j2 elif section.type == "generic" or section.type == "summary"
+    \resumeSubHeadingListStart
+    %%j2 for entry in section.entries
+      \item
+      \BLOCK{if entry.title}
+        \textbf{\VAR{entry.title | escape_latex}} \BLOCK{if entry.subtitle} -- \VAR{entry.subtitle | escape_latex} \BLOCK{endif} \\
+      \BLOCK{endif}
+      \VAR{entry.text | escape_latex}
+      \BLOCK{if entry.bullets}
+        \resumeItemListStart
+        %%j2 for bullet in entry.bullets
+          \resumeItem{\VAR{bullet.text | escape_latex}}
+        %%j2 endfor
+        \resumeItemListEnd
+      \BLOCK{endif}
+    %%j2 endfor
+    \resumeSubHeadingListEnd
+    
+  %%j2 else
+    % Unhandled section type: \VAR{section.type}
+  %%j2 endif
+\BLOCK{endif}
+%%j2 endfor
+
+\end{document}
