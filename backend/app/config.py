@@ -14,6 +14,21 @@ class Settings(BaseSettings):
     access_token_expire_hours: int = 24
 
     model_config = {"env_file": ".env", "extra": "ignore"}
+    
+    @property
+    def async_database_url(self) -> str:
+        """Return async-compatible database URL"""
+        url = self.database_url
+        
+        # If it's SQLite, it's already async-compatible
+        if "sqlite" in url:
+            return url
+            
+        # Convert PostgreSQL URL to use asyncpg
+        if url and url.startswith("postgresql://"):
+            return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            
+        return url
 
 
 settings = Settings()
