@@ -26,7 +26,7 @@ app = FastAPI(title="TeXTile API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://textile-resume-editor.vercel.app/"],
+    allow_origins=["https://textile-resume-editor.vercel.app"],
     allow_origin_regex=settings.cors_allow_origin_regex or None,
     allow_credentials=True,
     allow_methods=["*"],
