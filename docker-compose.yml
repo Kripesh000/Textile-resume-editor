@@ -1,14 +1,23 @@
-services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: textile
-      POSTGRES_PASSWORD: textile
-      POSTGRES_DB: textile
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+# Docker Compose configuration
+# Note: TeXTile now uses SQLite for local development
+# No database services required - database file stores locally as textile.db
+#
+# If you need Docker for other services, add them here.
+# Example services could include: Redis cache, worker queue, etc.
 
-volumes:
-  pgdata:
+services:
+  # PostgreSQL database service removed - using SQLite instead
+  # Previously defined PostgreSQL 16 service for reference:
+  # db:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_USER: textile
+  #     POSTGRES_PASSWORD: textile
+  #     POSTGRES_DB: textile
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+
+# volumes:
+#   pgdata:

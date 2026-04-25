@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: resumeeditor-backend
+    env: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite+aiosqlite:///./textile.db
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: http://localhost:3000
+      - key: CORS_ALLOW_ORIGIN_REGEX
+        value: "https://.*\\.vercel\\.app"
+      - key: ACCESS_TOKEN_EXPIRE_HOURS
+        value: "24"
+      # Set TECTONIC_PATH after installing tectonic on Render (see README)
+      # - key: TECTONIC_PATH
+      #   value: /usr/local/bin/tectonic

@@ -17,8 +17,8 @@ TeXTile is a web-based resume editor that allows users to:
 ### Backend
 - **Framework**: FastAPI 0.115.0
 - **Server**: Uvicorn 0.30.6
-- **Database**: PostgreSQL 16 (via Docker Compose) with SQLAlchemy 2.0.35
-- **ORM**: SQLAlchemy with async support (AsyncPG)
+- **Database**: SQLite (local file-based, no server required) with SQLAlchemy 2.0.35
+- **ORM**: SQLAlchemy with async support (aiosqlite)
 - **LaTeX Compilation**: Tectonic 0.15.0
 - **Template Engine**: Jinja2 3.1.4
 - **Authentication**: JWT tokens with python-jose and bcrypt
@@ -35,8 +35,7 @@ TeXTile is a web-based resume editor that allows users to:
 - **Linting**: ESLint 9
 
 ### DevOps
-- **Containerization**: Docker & Docker Compose
-- **Database**: PostgreSQL 16-alpine
+- **Database**: SQLite (local file-based, no containerization needed)
 
 ## Architecture
 
@@ -149,10 +148,10 @@ FileNotFoundError: [Errno 2] No such file or directory: 'tectonic'
 ### Prerequisites
 - Python 3.12+
 - Node.js 18+
-- Docker & Docker Compose
 - macOS/Linux (Tectonic binary is included for arm64 architecture)
 
-### Backend Setup
+### Running the Backend (Local Development)
+
 ```bash
 cd backend
 python -m venv .venv
@@ -160,33 +159,118 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
 # Configure environment
-cp .env.example .env  # Update with your settings
+cp ../.env.example .env
+# Edit .env — at minimum set TECTONIC_PATH to the absolute path of frontend/tectonic
 
 # Start the server
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### Frontend Setup
+SQLite database (`textile.db`) is created automatically on first run — no setup needed.
+
+### Running the Frontend (Local Development)
+
 ```bash
 cd frontend
 npm install
+
+# Configure environment
+cp .env.local.example .env.local
+# .env.local.example already points NEXT_PUBLIC_API_URL to http://localhost:8000
+
 npm run dev
 ```
 
-### Database Setup
-```bash
-docker-compose up -d
-```
+Open [http://localhost:3000](http://localhost:3000).
 
-### Environment Variables (.env)
-```
-DATABASE_URL=sqlite+aiosqlite:///./textile.db
-SECRET_KEY=your-secret-key-here
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=llama3.2:3b
-CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-TECTONIC_PATH=/path/to/tectonic/binary
-ACCESS_TOKEN_EXPIRE_HOURS=24
+### Backend Environment Variables (`backend/.env`)
+
+| Variable | Default | Description |
+|---|---|---|
+| `DATABASE_URL` | `sqlite+aiosqlite:///./textile.db` | Database connection string |
+| `SECRET_KEY` | *(must change)* | JWT signing secret — use `openssl rand -hex 32` |
+| `CORS_ORIGINS` | `http://localhost:3000,...` | Comma-separated exact allowed origins |
+| `CORS_ALLOW_ORIGIN_REGEX` | `https://.*\.vercel\.app` | Regex for wildcard origins (Vercel previews) |
+| `TECTONIC_PATH` | *(derived from repo)* | Absolute path to tectonic binary |
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server URL (optional) |
+| `OLLAMA_MODEL` | `llama3.2:3b` | Ollama model for AI parsing (optional) |
+| `ACCESS_TOKEN_EXPIRE_HOURS` | `24` | JWT token lifetime |
+
+---
+
+## Deploy Backend to Render
+
+1. Push the repository to GitHub.
+
+2. Go to [render.com](https://render.com) → **New → Web Service** → connect your repo.
+
+3. Configure the service:
+   - **Root Directory**: `backend`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+
+4. Set environment variables in the Render dashboard:
+
+   | Key | Value |
+   |---|---|
+   | `SECRET_KEY` | *(generate with `openssl rand -hex 32`)* |
+   | `DATABASE_URL` | `sqlite+aiosqlite:///./textile.db` (SQLite) or your PostgreSQL URL |
+   | `CORS_ORIGINS` | `https://your-app.vercel.app` (your production Vercel URL) |
+   | `CORS_ALLOW_ORIGIN_REGEX` | `https://.*\.vercel\.app` |
+   | `TECTONIC_PATH` | Path to tectonic binary on the server |
+
+   > **SQLite note**: Render's free tier uses an ephemeral filesystem — the SQLite database
+   > resets on every deploy. For persistent data, either add a **Render Disk** (paid) or
+   > switch to PostgreSQL by changing `DATABASE_URL` to `postgresql+asyncpg://...` (the
+   > `asyncpg` driver is already in `requirements.txt`).
+
+   > **Tectonic note**: The `frontend/tectonic` binary is macOS arm64 only and will not run
+   > on Render (Linux). Install tectonic on the server:
+   > ```bash
+   > curl --proto '=https' --tlsv1.2 -fsSL https://drop.example.com/tectonic/install.sh | sh
+   > ```
+   > Then set `TECTONIC_PATH` to the installed binary path.
+
+5. Deploy. Your backend URL will be `https://your-service-name.onrender.com`.
+
+   Test it: `curl https://your-service-name.onrender.com/api/health`
+
+---
+
+## Deploy Frontend to Vercel
+
+1. Go to [vercel.com](https://vercel.com) → **New Project** → import your GitHub repo.
+
+2. Set the **Root Directory** to `frontend`.
+
+3. Add the environment variable in the Vercel dashboard:
+
+   | Key | Value |
+   |---|---|
+   | `NEXT_PUBLIC_API_URL` | `https://your-service-name.onrender.com` |
+
+   > This is the Render backend URL from the previous step.
+
+4. Deploy. Vercel auto-detects Next.js and runs `npm run build` + `npm start`.
+
+5. Once deployed, update `CORS_ORIGINS` on Render to include your Vercel production URL:
+   ```
+   CORS_ORIGINS=https://your-app.vercel.app
+   ```
+
+---
+
+## Verify End-to-End Connectivity
+
+After both services are deployed:
+
+```bash
+# 1. Health check
+curl https://your-service-name.onrender.com/api/health
+# Expected: {"status":"ok"}
+
+# 2. Register a user from the frontend and confirm no CORS errors in browser devtools
+# 3. Check the Network tab — all /api/v1/* calls should go to the Render URL
 ```
 
 ## API Endpoints
@@ -247,7 +331,7 @@ pytest --asyncio-mode=auto tests/
 | Issue | Solution |
 |-------|----------|
 | Tectonic not found | Ensure `TECTONIC_PATH` in `.env` points to correct binary |
-| Database connection errors | Verify `DATABASE_URL` and PostgreSQL is running via Docker |
+| Database file not found | Check `DATABASE_URL` in `.env` - SQLite creates `textile.db` automatically on first run |
 | LaTeX compilation timeouts | Check template for infinite loops; increase timeout in `latex_service.py` |
 | CORS errors | Verify `CORS_ORIGINS` includes your frontend URL |
 | Import parsing fails | Check file format (PDF/LaTeX) and ensure parsers are installed |
@@ -259,7 +343,6 @@ pytest --asyncio-mode=auto tests/
 - [ ] Cloud storage integration for resumes
 - [ ] Advanced analytics on resume performance
 - [ ] Integration with ATS systems
-- [ ] Mobile app support
 - [ ] Version history and rollback
 
 ## Contributing
@@ -269,10 +352,3 @@ pytest --asyncio-mode=auto tests/
 3. Ensure all tests pass
 4. Submit PR with description
 
-## License
-
-[Add your license here]
-
-## Contact & Support
-
-For issues, feature requests, or questions, please open an issue on the repository.
